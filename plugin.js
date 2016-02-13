@@ -1,17 +1,21 @@
 'use strict';
 
+// Make our own plugin main interface an event emitter.
+// This can be used to communicate and subscribe to others plugins events.
 import { EventEmitter } from 'events';
 
 /**
  * Plugin Interface
  * @class Plugin
  */
-export default class {
+export default class extends EventEmitter {
 
   /**
    * Construct the plugin.
    */
   constructor() {
+    super();
+
     // Will be injected by core
     this.app = null;
 
@@ -19,10 +23,6 @@ export default class {
     this.server = null;
     this.players = null;
     this.maps = null;
-
-    // Make our own plugin main interface an event emitter.
-    // This can be used to communicate and subscribe to others plugins events.
-    EventEmitter.call(this);
   }
 
   /**
@@ -32,6 +32,8 @@ export default class {
    */
   inject(app) {
     this.app = app;
+
+    this.server = app.server;
 
     // Expand app into separate parts.
     // TODO: Fill in plugins, server, players, maps.
