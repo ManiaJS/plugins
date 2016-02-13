@@ -18,6 +18,6 @@ export default class {
 
     // Make our own plugin main interface an event emitter.
     // This can be used to communicate and subscribe to others plugins events.
-    EventEmitter.call(this);
+    EventEmitter.call(this.plugin);
   }
 }
