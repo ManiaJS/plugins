@@ -23,6 +23,14 @@ export default class extends EventEmitter {
     this.server = null;
     this.players = null;
     this.maps = null;
+
+
+    /**
+     * Will hold the defined models for this plugin!
+     *
+     * @type {{}}
+     */
+    this.models = {};
   }
 
   /**
