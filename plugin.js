@@ -35,19 +35,24 @@ export default class extends Plugin {
     return new Promise((resolve, reject) => {
       // Event
       this.server.on('map.begin', (map) => {
-        this.app.log.debug('New map: ' + this.maps.current.Name + ' by ' + this.maps.current.Author);
-        this.server.send().chat('New map: ' + this.maps.current.Name + '$z$s by ' + this.maps.current.Author).exec();
+        this.app.log.debug('New map: ' + this.maps.current.name + ' by ' + this.maps.current.author);
+        this.server.send().chat('New map: ' + this.maps.current.name + '$z$s by ' + this.maps.current.author).exec();
 
+        let Player = this.app.models.Player;
         this.models['LocalRecord'].findAll({
           where: {
             MapId: this.maps.current.id
-          }
+          },
+          include: [Player]
         }).then((records) => {
           this.records = records;
 
-          // var localRecords = '$39fLocal Records on $fff' + this.currentMap.Name + '$z$s$39f: ';
+          var localRecords = '$39fLocal Records on $fff' + this.currentMap.Name + '$z$s$39f: ';
           var recordPos = 1;
           this.records.forEach((record) => {
+            //localRecords = localRecords + '$fff' + recordPos + '$39f. $fff' + player.NickName + '$z$s$39f [$fff' + record.Score + '$39f] ';
+            this.app.log.debug(recordPos + '. ' + record.player.NickName + ' [' + record.Score + ']');
+            recordPos++;
             /*this.models['Player'].findOne({
              where: {
              id: record.PlayerId

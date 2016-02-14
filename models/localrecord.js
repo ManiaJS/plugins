@@ -2,26 +2,23 @@
 
 export default function (sequelize, DataTypes) {
   let LocalRecord = sequelize.define('LocalRecord', {
-    MapId: {
+    mapId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: sequelize.model('Map'),
-        key: 'id'
-      }
+      allowNull: false
     },
-    PlayerId: {
+    playerId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-
-      references: {
-        model: sequelize.model('Player'),
-        key: 'id'
-      }
+      allowNull: false
     },
-    Score: DataTypes.INTEGER,
-    Checkpoints: DataTypes.STRING
+    score: DataTypes.INTEGER,
+    checkpoints: DataTypes.STRING
+  }, {
+    tableName: 'localrecord',
+    charset: 'utf8'
   });
+
+  LocalRecord.hasOne(sequelize.model('Map'));
+  LocalRecord.hasOne(sequelize.model('Player'));
 
   return LocalRecord;
 }
