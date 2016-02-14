@@ -36,10 +36,12 @@ export default class extends EventEmitter {
   /**
    * Inject Core App interface into the plugin.
    *
-   * @param {App} app
+   * @param {App} app App context.
+   * @param {object} config Plugin config.
    */
-  inject(app) {
+  inject(app, config) {
     this.app = app;
+    this.config = config;
 
     this.server = app.server;
 
