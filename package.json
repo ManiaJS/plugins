@@ -1,0 +1,9 @@
+{
+  "name": "maniajs-localrecords",
+  "version": "0.0.0",
+  "private": false,
+  "main": "plugin.js",
+  "dependencies": {
+    "maniajs-plugin": "ManiaJS/maniajs-plugin"
+  }
+}
