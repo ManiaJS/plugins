@@ -47,11 +47,11 @@ export default class extends Plugin {
         }).then((records) => {
           this.records = records;
 
-          var localRecords = '$39fLocal Records on $fff' + this.currentMap.Name + '$z$s$39f: ';
+          var localRecords = '$39fLocal Records on $fff' + this.maps.current.name + '$z$s$39f: ';
+
           var recordPos = 1;
           this.records.forEach((record) => {
-            //localRecords = localRecords + '$fff' + recordPos + '$39f. $fff' + player.NickName + '$z$s$39f [$fff' + record.Score + '$39f] ';
-            this.app.log.debug(recordPos + '. ' + record.player.NickName + ' [' + record.Score + ']');
+            localRecords += '$fff' + recordPos + '$39f. $fff' + record.Player.nickname + '$z$s$39f [$fff' + record.score + '$39f] ';
             recordPos++;
             /*this.models['Player'].findOne({
              where: {
@@ -61,8 +61,10 @@ export default class extends Plugin {
              localRecords = localRecords + '$fff' + recordPos + '$39f. $fff' + player.NickName + '$z$s$39f [$fff' + record.Score + '$39f] ';
              recordPos++;
              });*/
-            console.log(record);
           });
+
+          this.server.send().chat(localRecords).exec();
+
         });
       });
 
