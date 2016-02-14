@@ -55,10 +55,20 @@ export default class extends Plugin {
 
           this.server.send().chat(localRecords).exec();
 
-          this.app.players.list.forEach((player) => {
+          Object.keys(this.players.list).forEach((login) => {
+            let player = this.players.list[login];
+
             var record = this.records.filter(function(rec) { return rec.playerId = player.id; });
-            var yourRecord = record? '$090Your current Local Record is: $fff' + this.records.indexOf(record) + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.' : '$090You currently do not have a Local Record on this map.';
-            this.server.send().chat(yourRecord);
+            var text = '$090You currently do not have a Local Record on this map.';
+
+            if (record.length > 0) {
+              record = record[0];
+              text = '$090Your current Local Record is: $fff' + this.records.indexOf(record) + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.';
+            }
+
+            this.server.send().chat(text, {
+              destination: login
+            }).exec();
           });
         });
       });
