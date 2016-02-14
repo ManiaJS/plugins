@@ -45,20 +45,21 @@ export default class extends Plugin {
           },
           include: [Player]
         }).then((records) => {
-          this.records = records;
+          this.records = records.sort((a, b) => a.score - b.score);
 
           var localRecords = '$39fLocal Records on $fff' + this.maps.current.name + '$z$s$39f: ';
 
-          var recordPos = 1;
-          this.records.forEach((record) => {
-            if(record.Player) {
-              localRecords += '$fff' + recordPos + '$39f. $fff' + record.Player.nickname + '$z$s$39f [$fff' + this.app.util.times.stringTime(record.score) + '$39f] ';
-              recordPos++;
-            }
-          });
+          for(var recordPos = 1; (recordPos < 11 && recordPos < this.records.length); recordPos++) {
+            localRecords += '$fff' + recordPos + '$39f. $fff' + this.records[(recordPos - 1)].Player.nickname + '$z$s$39f [$fff' + this.app.util.times.stringTime(this.records[(recordPos - 1)].score) + '$39f] ';
+          }
 
           this.server.send().chat(localRecords).exec();
 
+          this.app.players.list.forEach((player) => {
+            var record = this.records.filter(function(rec) { return rec.playerId = player.id; });
+            var yourRecord = record? '$090Your current Local Record is: $fff' + this.records.indexOf(record) + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.' : '$090You currently do not have a Local Record on this map.';
+            this.server.send().chat(yourRecord);
+          });
         });
       });
 
