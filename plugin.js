@@ -44,6 +44,7 @@ export default class extends EventEmitter {
     this.server = app.server;
 
     // Expand app into separate parts.
-    // TODO: Fill in plugins, server, players, maps.
+    this.players = app.players;
+    this.maps = app.maps;
   }
 }
