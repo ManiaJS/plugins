@@ -13,6 +13,7 @@ export default function (sequelize, DataTypes) {
     PlayerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+
       references: {
         model: sequelize.model('Player'),
         key: 'id'

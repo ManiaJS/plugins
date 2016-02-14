@@ -36,12 +36,13 @@ export default class extends Plugin {
     return new Promise((resolve, reject) => {
       // Event
       this.server.on('map.begin', (map) => {
-        this.models['Map'].findOne({
+        this.app.models['Map'].findOne({
           where: {
             Uid: map.map.UId
           }
         }).then((map) => {
-          this.currentMap = map.get({plain: true});
+          this.currentMap = map; // null = none found.
+
           this.app.log.debug('New map: ' + this.currentMap.Name + ' by ' + this.currentMap.Author);
           this.server.send().chat('New map: ' + this.currentMap.Name + '$z$s by ' + this.currentMap.Author).exec();
 
@@ -50,26 +51,24 @@ export default class extends Plugin {
               MapId: this.currentMap.id
             }
           }).then((records) => {
-            this.records = [];
-            records.forEach((record) => {
-              this.records.push(record.get({plain: true}));
-            });
+            this.records = records;
 
-            var localRecords = '$39fLocal Records on $fff' + this.currentMap.Name + '$z$s$39f: ';
+            // var localRecords = '$39fLocal Records on $fff' + this.currentMap.Name + '$z$s$39f: ';
             var recordPos = 1;
             this.records.forEach((record) => {
-              this.models['Player'].findOne({
+              /*this.models['Player'].findOne({
                 where: {
                   id: this.currentMap.id
                 }
               }).then((player) => {
                 localRecords = localRecords + '$fff' + recordPos + '$39f. $fff' + player.NickName + '$z$s$39f [$fff' + record.Score + '$39f] ';
                 recordPos++;
-              });
+              });*/
+              console.log(record);
             });
 
-            this.server.send().chat(localRecords).exec();
-            console.log(util.inspect(this.records, false, null));
+            //this.server.send().chat(localRecords).exec();
+            //console.log(util.inspect(this.records, false, null));
           });
         });
       });
@@ -80,6 +79,8 @@ export default class extends Plugin {
           this.server.send().skip().exec();
         }
       });
+
+      resolve();
     });
   }
 }
