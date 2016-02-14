@@ -34,44 +34,11 @@ export default class extends Plugin {
   init() {
     return new Promise((resolve, reject) => {
       // Event
-      this.server.on('map.begin', (map) => {
-        this.app.log.debug('New map: ' + this.maps.current.name + ' by ' + this.maps.current.author);
-        this.server.send().chat('New map: ' + this.maps.current.name + '$z$s by ' + this.maps.current.author).exec();
+      this.server.on('map.begin',
+        (params) => this.beginMap(params));
 
-        let Player = this.app.models.Player;
-        this.models['LocalRecord'].findAll({
-          where: {
-            MapId: this.maps.current.id
-          },
-          include: [Player]
-        }).then((records) => {
-          this.records = records.sort((a, b) => a.score - b.score);
-
-          var localRecords = '$39fLocal Records on $fff' + this.maps.current.name + '$z$s$39f: ';
-
-          for(var recordPos = 1; (recordPos < 11 && recordPos < this.records.length); recordPos++) {
-            localRecords += '$fff' + recordPos + '$39f. $fff' + this.records[(recordPos - 1)].Player.nickname + '$z$s$39f [$fff' + this.app.util.times.stringTime(this.records[(recordPos - 1)].score) + '$39f] ';
-          }
-
-          this.server.send().chat(localRecords).exec();
-
-          Object.keys(this.players.list).forEach((login) => {
-            let player = this.players.list[login];
-
-            var record = this.records.filter(function(rec) { return rec.playerId = player.id; });
-            var text = '$090You currently do not have a Local Record on this map.';
-
-            if (record.length > 0) {
-              record = record[0];
-              text = '$090Your current Local Record is: $fff' + this.records.indexOf(record) + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.';
-            }
-
-            this.server.send().chat(text, {
-              destination: login
-            }).exec();
-          });
-        });
-      });
+      this.server.on('trackmania.player.finish',
+        (params) => this.playerFinish(params));
 
       this.server.on('player.chat', (data) => {
         if(data.command && data.text == '/skip') {
@@ -82,5 +49,55 @@ export default class extends Plugin {
 
       resolve();
     });
+  }
+
+
+  beginMap(map) {
+    this.app.log.debug('New map: ' + this.maps.current.name + ' by ' + this.maps.current.author);
+    this.server.send().chat('New map: ' + this.maps.current.name + '$z$s by ' + this.maps.current.author).exec();
+
+    let Player = this.app.models.Player;
+    this.models.LocalRecord.findAll({
+      where: {
+        MapId: this.maps.current.id
+      },
+      include: [Player]
+    }).then((records) => {
+      this.records = records.sort((a, b) => a.score - b.score);
+
+      var localRecords = '$39fLocal Records on $fff' + this.maps.current.name + '$z$s$39f: ';
+
+      for(var recordPos = 1; (recordPos < 11 && recordPos < this.records.length); recordPos++) {
+        localRecords += '$fff' + recordPos + '$39f. $fff' + this.records[(recordPos - 1)].Player.nickname + '$z$s$39f [$fff' + this.app.util.times.stringTime(this.records[(recordPos - 1)].score) + '$39f] ';
+      }
+
+      this.server.send().chat(localRecords).exec();
+
+      Object.keys(this.players.list).forEach((login) => {
+        let player = this.players.list[login];
+
+        var record = this.records.filter(function(rec) { return rec.playerId = player.id; });
+        var text = '$090You currently do not have a Local Record on this map.';
+
+        if (record.length > 0) {
+          record = record[0];
+          text = '$090Your current Local Record is: $fff' + this.records.indexOf(record) + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.';
+        }
+
+        this.server.send().chat(text, {
+          destination: login
+        }).exec();
+      });
+    });
+  }
+
+
+  playerFinish(finish) {
+    let login = finish.login;
+    let time = finish.timeOrScore;
+
+    console.log(login + ': ' + time);
+    console.log(login + ': ' + time);
+    console.log(login + ': ' + time);
   }
 }
