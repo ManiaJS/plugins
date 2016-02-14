@@ -19,7 +19,6 @@ export default class extends Plugin {
     this.name = Package.name;
     this.version = Package.version;
     this.directory = __dirname;
-    this.currentMap = null;
     this.records = null;
 
     // Add dependencies, enter module full id's (mostly npm package names) here.
@@ -36,39 +35,28 @@ export default class extends Plugin {
     return new Promise((resolve, reject) => {
       // Event
       this.server.on('map.begin', (map) => {
-        this.app.models['Map'].findOne({
+        this.app.log.debug('New map: ' + this.maps.current.Name + ' by ' + this.maps.current.Author);
+        this.server.send().chat('New map: ' + this.maps.current.Name + '$z$s by ' + this.maps.current.Author).exec();
+
+        this.models['LocalRecord'].findAll({
           where: {
-            Uid: map.map.UId
+            MapId: this.maps.current.id
           }
-        }).then((map) => {
-          this.currentMap = map; // null = none found.
+        }).then((records) => {
+          this.records = records;
 
-          this.app.log.debug('New map: ' + this.currentMap.Name + ' by ' + this.currentMap.Author);
-          this.server.send().chat('New map: ' + this.currentMap.Name + '$z$s by ' + this.currentMap.Author).exec();
-
-          this.models['LocalRecord'].findAll({
-            where: {
-              MapId: this.currentMap.id
-            }
-          }).then((records) => {
-            this.records = records;
-
-            // var localRecords = '$39fLocal Records on $fff' + this.currentMap.Name + '$z$s$39f: ';
-            var recordPos = 1;
-            this.records.forEach((record) => {
-              /*this.models['Player'].findOne({
-                where: {
-                  id: this.currentMap.id
-                }
-              }).then((player) => {
-                localRecords = localRecords + '$fff' + recordPos + '$39f. $fff' + player.NickName + '$z$s$39f [$fff' + record.Score + '$39f] ';
-                recordPos++;
-              });*/
-              console.log(record);
-            });
-
-            //this.server.send().chat(localRecords).exec();
-            //console.log(util.inspect(this.records, false, null));
+          // var localRecords = '$39fLocal Records on $fff' + this.currentMap.Name + '$z$s$39f: ';
+          var recordPos = 1;
+          this.records.forEach((record) => {
+            /*this.models['Player'].findOne({
+             where: {
+             id: record.PlayerId
+             }
+             }).then((player) => {
+             localRecords = localRecords + '$fff' + recordPos + '$39f. $fff' + player.NickName + '$z$s$39f [$fff' + record.Score + '$39f] ';
+             recordPos++;
+             });*/
+            console.log(record);
           });
         });
       });
