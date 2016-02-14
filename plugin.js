@@ -17,10 +17,13 @@ export default class extends Plugin {
     this.name = Package.name;
     this.version = Package.version;
     this.directory = __dirname;
-    this.records = null;
 
     // Add dependencies, enter module full id's (mostly npm package names) here.
     this.dependencies = [];
+
+    // Plugin properties
+    this.records = null;
+    this.runs = [];
   }
 
   /**
@@ -38,6 +41,9 @@ export default class extends Plugin {
       this.server.on('trackmania.player.finish',
         (params) => this.playerFinish(params));
 
+      this.server.on('trackmania.player.checkpoint',
+        (params) => this.playerCheckpoint(params));
+
       this.server.on('player.chat', (data) => {
         if(data.command && data.text == '/skip') {
           this.server.send().chat("$fffSkipping map...").exec();
@@ -45,14 +51,28 @@ export default class extends Plugin {
         }
       });
 
-      this.beginMap(this.maps.current);
+      this.loadRecords(this.maps.current);
 
       resolve();
     });
   }
 
-
+  /**
+   * Function called on map start: empties run overview and loads/displays Local Records.
+   * @param map
+   */
   beginMap(map) {
+    this.runs = [];
+
+    this.loadRecords(map);
+  }
+
+  /**
+   * Function will display the local records based on the current map (does not use map input).
+   *
+   * @param map
+   */
+  loadRecords(map) {
     this.app.log.debug('New map: ' + this.maps.current.name + ' by ' + this.maps.current.author);
     this.server.send().chat('New map: ' + this.maps.current.name + '$z$s by ' + this.maps.current.author).exec();
 
@@ -65,7 +85,7 @@ export default class extends Plugin {
     }).then((records) => {
       this.records = records.sort((a, b) => a.score - b.score);
 
-      var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f before this round (' + (this.records.length - 1) + '): ';
+      var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f (' + (this.records.length - 1) + '): ';
 
       for(var recordPos = 1; (recordPos < 11 && recordPos < this.records.length); recordPos++) {
         localRecords += '$fff' + recordPos + '$39f. $<$fff' + this.records[(recordPos - 1)].Player.nickname + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[(recordPos - 1)].score) + '$39f] ';
@@ -88,7 +108,11 @@ export default class extends Plugin {
     });
   }
 
-
+  /**
+   * Function registers when a player finished and updates/inserts a local record if it's his/her best new time.
+   *
+   * @param finish
+   */
   playerFinish(finish) {
     let login = finish.login;
     let time = finish.timeOrScore;
@@ -104,7 +128,11 @@ export default class extends Plugin {
           var previousIndex = this.records.indexOf(record[0]);
 
           record[0].score = time;
-          record[0].checkpoints = '';
+          if(this.runs[login]) {
+            record[0].checkpoints = this.runs[login];
+          } else {
+            record[0].checkpoints = '';
+          }
           record[0].save();
 
           this.records = this.records.sort((a, b) => a.score - b.score);
@@ -131,21 +159,37 @@ export default class extends Plugin {
           PlayerId: player.id
         });
 
+        newRecord.checkpoints = this.runs[login]? this.runs[login] : '';
+
         this.records.push(newRecord);
         this.records = this.records.sort((a, b) => a.score - b.score);
         var newRecordText = '$090$<$fff' + player.nickname + '$>$090 drove the $fff' + this.records.indexOf(newRecord) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(newRecord.score) + '$090!';
         this.server.send().chat(newRecordText).exec();
 
         newRecord.save();
-
-        var currentRecord = 1;
-        this.records.forEach((record) => {
-          console.log(currentRecord + '. ' + this.app.util.times.stringTime(record.score) + ' by ' + record.Player.login);
-          currentRecord++;
-        });
       }
+    }
+  }
 
-      console.log(login + ': ' + time);
+  /**
+   * Function registers when a player passes a checkpoint and saves this in the current runs.
+   * playerId: 0,
+   * login: 1,
+   * timeOrScore: 2,
+   * curLap: 3,
+   * checkpoint: 4
+   *
+   * @param checkpoint
+   */
+  playerCheckpoint(checkpoint) {
+    let login = checkpoint.login;
+
+    if(checkpoint.checkpoint == 0) {
+      this.runs[login] = checkpoint.timeOrScore;
+    } else {
+      if(this.runs[login]) {
+        this.runs[login] += ',' + checkpoint.timeOrScore;
+      }
     }
   }
 }
