@@ -51,7 +51,7 @@ export default class extends Plugin {
 
           var recordPos = 1;
           this.records.forEach((record) => {
-            localRecords += '$fff' + recordPos + '$39f. $fff' + record.Player.nickname + '$z$s$39f [$fff' + record.score + '$39f] ';
+            localRecords += '$fff' + recordPos + '$39f. $fff' + record.Player.nickname + '$z$s$39f [$fff' + this.app.util.times.stringTime(record.score) + '$39f] ';
             recordPos++;
             /*this.models['Player'].findOne({
              where: {
