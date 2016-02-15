@@ -1,6 +1,6 @@
 {
   "name": "maniajs-plugin",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Plugin Interface for ManiaJS Plugin Structure",
   "private": false,
   "main": "lib/plugin.js",
