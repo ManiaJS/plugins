@@ -32,8 +32,18 @@ export default class extends Plugin {
   init() {
     return new Promise((resolve, reject) => {
       // Event
-      this.app.server.on('player.connect', this.playerConnect);
-      this.app.server.on('player.disconnect', this.playerDisconnect);
+      this.server.on('player.connect', (params) => {
+        this.playerConnect(params);
+      });
+      this.server.on('player.disconnect', (params) => {
+        this.playerDisconnect(params);
+      });
+
+
+      // Commands
+      this.server.command.on('welcome', 1, (player, params) => {
+        this.server.send().chat('Welcome command!').exec();
+      });
 
       resolve();
     });
@@ -41,19 +51,18 @@ export default class extends Plugin {
 
 
   playerConnect(player) {
-    let detail = this.app.players.list[player.login] || false;
+    let detail = this.players.list[player.login] || false;
 
     if (detail) {
-      this.app.server.send().chat('Welcome ' + detail.nickname + '$z to the server!').exec();
+      this.server.send().chat('Welcome ' + detail.nickname + '$z to the server!').exec();
     }
   }
 
   playerDisconnect(player) {
-    let detail = this.app.players.list[player.login] || false;
+    let detail = this.players.list[player.login] || false;
 
-    console.log(detail);
     if (detail) {
-      this.app.server.send().chat('Player ' + detail.nickname + '$z disconnected!').exec();
+      this.server.send().chat('Player ' + detail.nickname + '$z disconnected!').exec();
     }
   }
 }
