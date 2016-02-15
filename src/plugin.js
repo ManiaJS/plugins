@@ -51,9 +51,11 @@ export default class extends Plugin {
         }
       });
 
-      this.loadRecords(this.maps.current);
-
-      resolve();
+      this.loadRecords(this.maps.current).then(() => {
+        resolve();
+      }).catch((err) => {
+        reject(err);
+      });
     });
   }
 
@@ -71,13 +73,16 @@ export default class extends Plugin {
    * Function will display the local records based on the current map (does not use map input).
    *
    * @param map
+   *
+   * @returns {Promise}
    */
   loadRecords(map) {
     this.app.log.debug('New map: ' + this.maps.current.name + ' by ' + this.maps.current.author);
     this.server.send().chat('New map: ' + this.maps.current.name + '$z$s by ' + this.maps.current.author).exec();
 
     let Player = this.app.models.Player;
-    this.models.LocalRecord.findAll({
+
+    return this.models.LocalRecord.findAll({
       where: {
         MapId: this.maps.current.id
       },
