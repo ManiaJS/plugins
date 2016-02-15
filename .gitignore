@@ -30,18 +30,10 @@ coverage
 node_modules
 
 ### App Specific
-# config + db (sqlite)
 config.yaml
 database.sqlite
 
-# logs
-/log/*
-!/log/.gitkeep
 
-
-
-### Develop
-/plugins
-
-### Babel Output (dev)
-/lib/
+### Babel Output
+/lib/*
+!/lib/.gitkeep

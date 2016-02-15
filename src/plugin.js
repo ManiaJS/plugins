@@ -1,6 +1,6 @@
 'use strict';
 
-import * as Package from './package.json';
+import * as Package from './../package.json';
 import * as path from 'path';
 
 import Plugin from 'maniajs-plugin';
