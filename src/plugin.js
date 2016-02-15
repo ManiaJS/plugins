@@ -48,5 +48,6 @@ export default class extends EventEmitter {
     // Expand app into separate parts.
     this.players = app.players;
     this.maps = app.maps;
+    this.plugins = app.plugins;
   }
 }
