@@ -163,7 +163,7 @@ export default class extends Plugin {
 
         this.records.push(newRecord);
         this.records = this.records.sort((a, b) => a.score - b.score);
-        var newRecordText = '$090$<$fff' + player.nickname + '$>$090 drove the $fff' + this.records.indexOf(newRecord) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(newRecord.score) + '$090!';
+        var newRecordText = '$090$<$fff' + player.nickname + '$>$090 drove the $fff' + (this.records.indexOf(newRecord) + 1) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(newRecord.score) + '$090!';
         this.server.send().chat(newRecordText).exec();
 
         newRecord.save();
