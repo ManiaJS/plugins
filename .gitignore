@@ -35,4 +35,5 @@ database.sqlite
 
 
 ### Babel Output
-/lib/
+/lib/*
+!/lib/.gitkeep
