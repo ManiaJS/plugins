@@ -2,8 +2,16 @@
   "name": "maniajs-welcome",
   "version": "0.0.0",
   "private": false,
-  "main": "plugin.js",
+  "main": "lib/plugin.js",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "babel src -d lib"
+  },
   "dependencies": {
     "maniajs-plugin": "ManiaJS/maniajs-plugin"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.5.1",
+    "babel-preset-es2015": "^6.5.0"
   }
 }
