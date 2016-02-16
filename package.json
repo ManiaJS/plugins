@@ -5,7 +5,7 @@
   "main": "lib/plugin.js",
   "scripts": {
     "prepublish": "npm run build",
-    "build": "babel src -d lib"
+    "build": "npm i --only=dev --ignore-scripts && babel src -d lib"
   },
   "dependencies": {
     "maniajs-plugin": "0.*"
