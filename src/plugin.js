@@ -26,8 +26,11 @@ module.exports.default = class extends Plugin {
     this.client = null;
     this.session = null;
 
-    this.records = null;
-    this.runs = [];
+    this.runs = [];       // Holds checkpoint times.
+
+    this.records =    []; // Holds fetched records and changed (the displaying state).
+    this.newRecords = []; // Holds newly driven records. (queue to send to the dedimania server).
+    this.playerInfo = []; // Holds info like max record limit and if banned, etc.
 
     this.host = 'dedimania.net';
     this.port = 8082;
