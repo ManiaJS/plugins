@@ -2,17 +2,13 @@
   "name": "maniajs-dedimania",
   "version": "0.0.0",
   "private": false,
-  "main": "lib/plugin.js",
+  "main": "src/plugin.js",
   "scripts": {
-    "prepublish": "npm run build",
-    "build": "babel src -d lib"
+    "n-prepublish": "npm run build",
+    "n-build": "babel src -d lib"
   },
   "dependencies": {
     "maniajs-plugin": "0.*",
     "xmlrpc": "^1.3.1"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.5.1",
-    "babel-preset-es2015": "^6.5.0"
   }
 }

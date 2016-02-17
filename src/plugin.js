@@ -1,15 +1,15 @@
 'use strict';
 
-import * as Package from './../package.json';
-import * as path from 'path';
-import * as xmlrpc from 'xmlrpc';
+var Package = require('./../package.json');
+var path = require('path');
+var xmlrpc = require('xmlrpc');
 
-import Plugin from 'maniajs-plugin';
+var Plugin = require('maniajs-plugin').default;
 
 /**
  * DediMania Plugin.
  */
-export default class extends Plugin {
+module.exports.default = class extends Plugin {
 
   constructor() {
     super();
@@ -32,6 +32,9 @@ export default class extends Plugin {
     this.host = 'dedimania.net';
     this.port = 8082;
     this.path = '/Dedimania';
+
+
+    this.timerUpdate = null;
   }
 
   /**
@@ -55,40 +58,26 @@ export default class extends Plugin {
         path: this.path
       });
 
-      // Open Session
-      this.openSession()
-        .then((sessionId) => {
-          this.session = sessionId;
-
-          this.getSession();
-
-          return resolve();
-        })
-        .then(() => {
-          return this.updatePlayers();
-        })
-        .catch((err) => {
-          this.app.log.error(err);
-
-          return reject(err);
-        });
-
-      // Event
-      /*
+      // Events
       this.server.on('map.begin',
         (params) => this.beginMap(params));
+      this.server.on('map.end',
+        (params) => this.endMap(params));
 
-      this.server.on('trackmania.player.finish',
-        (params) => this.playerFinish(params));
+      // Open Session
+      return this.openSession().then((sessionId) => {
+        this.session = sessionId;
 
-      this.server.on('trackmania.player.checkpoint',
-        (params) => this.playerCheckpoint(params));
+        this.getSession();
 
-
-      this.loadRecords(this.maps.current);
-
-      resolve();
-      */
+        return this.server.send().custom('GetCurrentMapInfo').exec();
+      }).then((res) => {
+        this.loadRecords(res);
+        return resolve();
+      }).catch((err) => {
+        this.app.log.error(err);
+        return reject(err);
+      });
     });
   }
 
@@ -133,22 +122,20 @@ export default class extends Plugin {
    * @returns {Promise}
    */
   getSession() {
+    if (! this.session) {
+      return this.openSession();
+    }
     return new Promise((resolve, reject) => {
-      if (! this.session) {
-        return this.openSession();
-      }
-      return new Promise((resolve, reject) => {
-        this.client.methodCall('dedimania.CheckSession', [this.session], (err, res) => {
-          if (err) {
-            return reject(err);
-          }
+      this.client.methodCall('dedimania.CheckSession', [this.session], (err, res) => {
+        if (err) {
+          return reject(err);
+        }
 
-          // We need to remake a session.
-          if (! res) {
-            return this.openSession();
-          }
-          return resolve(this.session);
-        });
+        // We need to remake a session.
+        if (! res) {
+          return this.openSession();
+        }
+        return resolve(this.session);
       });
     });
   }
@@ -156,12 +143,10 @@ export default class extends Plugin {
   updatePlayers() {
     let server = {};
     let votes = {};
-    let players = {};
+    let players = [];
     var session = null;
 
-    return new Promise((resolve, reject) => {
-      return this.getSession();
-    }).then((sessionId) => {
+    return this.getSession().then((sessionId) => {
       session = sessionId;
       return this.server.getServerOptions();
     }).then((options) => {
@@ -173,19 +158,72 @@ export default class extends Plugin {
       server.MaxSpecs = options.CurrentMaxSpectators;
       server.NumSpecs = this.players.countSpectators();
 
-      console.log(server);
-      process.exit();
+      return this.server.send().custom('GetScriptName').exec();
+    }).then((script) => {
+      votes.UId = this.maps.current.uid;
+      votes.GameMode = 'TA';
+
+      // TODO: Parse script name.
+
+      // Players
+      for (let login in this.players.list) {
+        if (!this.players.list.hasOwnProperty(login)) continue;
+        if (!this.players.list[login].info)           continue;
+        let player = this.players.list[login];
+
+        players.push({
+          Login: player.login,
+          IsSpec: player.info && player.info.isSpectator ? true : false,
+          Vote: -1 // TODO: Vote
+        });
+      }
+
+      // Send update.
+      return new Promise((resolve, reject) => {
+        this.client.methodCall('dedimania.UpdateServerPlayers', [session, server, votes, players], (err, res) => {
+          if (err) {
+            return reject(err);
+          }
+
+          // We need to remake a session.
+          if (!res) {
+            return reject(new Error('Update players failed, got false back!'));
+          }
+          return resolve();
+        });
+      });
+    }).then(() => {
+      this.app.log.debug('Dedimania: Update Players Done!');
+    }).catch((err) => {
+      this.app.log.warn('Dedimania: Update Player failed: ', err);
     });
   }
 
   /**
-   * Function called on map start: empties run overview and loads/displays Local Records.
+   * Begin Map callback.
    * @param map
    */
   beginMap(map) {
     this.runs = [];
 
+    // Load Dedimania Records
     this.loadRecords(map);
+
+    // Set timer.
+    this.timerUpdate = setInterval(() => {
+      this.updatePlayers();
+    }, 240000); // 4 minutes.
+  }
+
+  /**
+   * End Map callback.
+   * @param map
+   */
+  endMap(map) {
+    // Clear Interval
+    if (this.timerUpdate) {
+      clearInterval(this.timerUpdate);
+    }
   }
 
   /**
@@ -194,36 +232,60 @@ export default class extends Plugin {
    * @param map
    */
   loadRecords(map) {
+    return new Promise((resolve, reject) => {
+      this.getSession().then((session) => {
+        let sendMap = {
+          UId: map.UId,
+          Name: map.Name,
+          Environment: map.Environnement,
+          Author: map.Author,
+          NbCheckpoints: map.NbCheckpoints,
+          NbLaps: map.NbLaps
+        };
 
+        let game = 'TA';
+        // TODO: Script.
 
-    let Player = this.app.models.Player;
-    this.models.LocalRecord.findAll({
-      where: {
-        MapId: this.maps.current.id
-      },
-      include: [Player]
-    }).then((records) => {
-      this.records = records.sort((a, b) => a.score - b.score);
+        let options = this.server.options;
+        let server = {
+          SrvName: options.Name,
+          Comment: options.Comment,
+          Private: options.Password.length > 0,
+          MaxPlayers: options.CurrentMaxPlayers,
+          NumPlayers: this.players.countPlayers(),
+          MaxSpecs: options.CurrentMaxSpectators,
+          NumSpecs: this.players.countSpectators()
+        };
 
-      var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f (' + (this.records.length - 1) + '): ';
+        let players = [];
 
-      for(var recordPos = 1; (recordPos < 11 && recordPos < this.records.length); recordPos++) {
-        localRecords += '$fff' + recordPos + '$39f. $<$fff' + this.records[(recordPos - 1)].Player.nickname + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[(recordPos - 1)].score) + '$39f] ';
-      }
+        // Players
+        for (let login in this.players.list) {
+          if (!this.players.list.hasOwnProperty(login)) continue;
+          if (!this.players.list[login].info)           continue;
+          let player = this.players.list[login];
 
-      this.server.send().chat(localRecords).exec();
-
-      Object.keys(this.players.list).forEach((login) => {
-        let player = this.players.list[login];
-        var record = this.records.filter(function(rec) { return rec.PlayerId == player.id; });
-        var text = '$090You currently do not have a Local Record on this map.';
-
-        if (record.length == 1) {
-          record = record[0];
-          text = '$090Your current Local Record is: $fff' + (this.records.indexOf(record) + 1) + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.';
+          players.push({
+            Login: player.login,
+            IsSpec: player.info && player.info.isSpectator ? true : false,
+            Vote: -1 // TODO: Vote
+          });
         }
 
-        this.server.send().chat(text, { destination: login }).exec();
+        // Send
+        this.client.methodCall('dedimania.GetChallengeRecords', [session, sendMap, game, server, players], (err, res) => {
+          if (err) {
+            return reject(err);
+          }
+
+          console.log(res);
+
+          if (! res) {
+            this.records = [];
+          }
+          this.records = res.Records;
+        });
+
       });
     });
   }
@@ -312,4 +374,4 @@ export default class extends Plugin {
       }
     }
   }
-}
+};
