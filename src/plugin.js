@@ -54,7 +54,7 @@ export default class extends Plugin {
     let detail = this.players.list[player.login] || false;
 
     if (detail) {
-      this.server.send().chat('Welcome ' + detail.nickname + '$z to the server!').exec();
+      this.server.send().chat('Welcome ' + detail.nickname + '$z$fff to the server!').exec();
     }
   }
 
@@ -62,7 +62,7 @@ export default class extends Plugin {
     let detail = this.players.list[player.login] || false;
 
     if (detail) {
-      this.server.send().chat('Player ' + detail.nickname + '$z disconnected!').exec();
+      this.server.send().chat('Player ' + detail.nickname + '$z$fff disconnected!').exec();
     }
   }
 }
