@@ -24,6 +24,9 @@ export default class extends Plugin {
     // Plugin properties
     this.records = null;
     this.runs = [];
+
+    this.recordlimit = 100;
+    this.displaylimit = 50;
   }
 
   /**
@@ -34,6 +37,16 @@ export default class extends Plugin {
    */
   init() {
     return new Promise((resolve, reject) => {
+      if(!this.config) {
+        if(this.config.hasOwnProperty('recordlimit') && this.config.recordlimit != '') {
+          this.recordlimit = this.config.recordlimit;
+        }
+
+        if(this.config.hasOwnProperty('displaylimit') && this.config.displaylimit != '') {
+          this.displaylimit = this.config.displaylimit;
+        }
+      }
+
       // Event
       this.server.on('map.begin',
         (params) => this.beginMap(params));
@@ -44,11 +57,9 @@ export default class extends Plugin {
       this.server.on('trackmania.player.checkpoint',
         (params) => this.playerCheckpoint(params));
 
-      this.server.on('player.chat', (data) => {
-        if(data.command && data.text == '/skip') {
-          this.server.send().chat("$fffSkipping map...").exec();
-          this.server.send().skip().exec();
-        }
+      this.server.command.on('skip', 1, (player, params) => {
+        this.server.send().chat("$fffSkipping map...").exec();
+        this.server.send().skip().exec();
       });
 
       this.loadRecords(this.maps.current).then(() => {
@@ -92,8 +103,8 @@ export default class extends Plugin {
 
       var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f (' + (this.records.length - 1) + '): ';
 
-      for(var recordPos = 1; (recordPos < 11 && recordPos < this.records.length); recordPos++) {
-        localRecords += '$fff' + recordPos + '$39f. $<$fff' + this.records[(recordPos - 1)].Player.nickname + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[(recordPos - 1)].score) + '$39f] ';
+      for(var recordPos = 0; (recordPos < 10 && recordPos < this.records.length && recordPos < (this.recordlimit + 1)); recordPos++) {
+        localRecords += '$fff' + (recordPos + 1) + '$39f. $<$fff' + this.records[recordPos].Player.nickname + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[recordPos].score) + '$39f] ';
       }
 
       this.server.send().chat(localRecords).exec();
@@ -105,7 +116,10 @@ export default class extends Plugin {
 
         if (record.length == 1) {
           record = record[0];
-          text = '$090Your current Local Record is: $fff' + (this.records.indexOf(record) + 1) + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.';
+          var recordIndex = (this.records.indexOf(record) + 1);
+          if(recordIndex <= this.recordlimit) {
+            text = '$090Your current Local Record is: $fff' + recordIndex + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.';
+          }
         }
 
         this.server.send().chat(text, { destination: login }).exec();
@@ -130,7 +144,7 @@ export default class extends Plugin {
         // Already has a local record
         if(time < record[0].score) {
           var previousTime = record[0].score;
-          var previousIndex = this.records.indexOf(record[0]);
+          var previousIndex = (this.records.indexOf(record[0]) + 1);
 
           record[0].score = time;
           if(this.runs[login]) {
@@ -141,13 +155,15 @@ export default class extends Plugin {
           record[0].save();
 
           this.records = this.records.sort((a, b) => a.score - b.score);
-          var newIndex = this.records.indexOf(record[0]);
+          var newIndex = (this.records.indexOf(record[0]) + 1);
 
           var improvedRecordText = '';
           if(newIndex < previousIndex) {
-            improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 gained the $fff' + (newIndex + 1) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) + '$090 ($fff' + (previousIndex + 1) + '$090. $fff' + this.app.util.times.stringTime(previousTime) + '$090)!';
+            improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 gained the $fff' + (newIndex) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
+                '$090 ($fff' + (previousIndex) + '$090. $fff' + this.app.util.times.stringTime(previousTime) + '$090/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$090)!';
           } else {
-            improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 improved his/her $fff' + (newIndex + 1) + '$090., with a time of $fff' + this.app.util.times.stringTime(record[0].score) + '$090 ($fff' + this.app.util.times.stringTime(previousTime) + '$090).';
+            improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 improved his/her $fff' + (newIndex) + '$090., with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
+                '$090 ($fff' + this.app.util.times.stringTime(previousTime) + '$090/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$090).';
           }
           this.server.send().chat(improvedRecordText).exec();
         } else if(time == record[0].score) {
@@ -168,7 +184,8 @@ export default class extends Plugin {
 
         this.records.push(newRecord);
         this.records = this.records.sort((a, b) => a.score - b.score);
-        var newRecordText = '$090$<$fff' + player.nickname + '$>$090 drove the $fff' + (this.records.indexOf(newRecord) + 1) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(newRecord.score) + '$090!';
+        var newRecordIndex = (this.records.indexOf(newRecord) + 1);
+        var newRecordText = '$090$<$fff' + player.nickname + '$>$090 drove the $fff' + newRecordIndex + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(newRecord.score) + '$090!';
         this.server.send().chat(newRecordText).exec();
 
         newRecord.save();
