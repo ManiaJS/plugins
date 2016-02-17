@@ -275,6 +275,7 @@ module.exports.default = class extends Plugin {
         // Send
         this.client.methodCall('dedimania.GetChallengeRecords', [session, sendMap, game, server, players], (err, res) => {
           if (err) {
+            console.error(err.stack);
             return reject(err);
           }
 
@@ -283,7 +284,14 @@ module.exports.default = class extends Plugin {
           if (! res) {
             this.records = [];
           }
+
           this.records = res.Records;
+          try {
+            this.records = this.records.sort((a, b) => a.Best - b.Best);
+            this.displayRecords();
+          } catch (err) {
+            this.app.log.warn('Dedimania: Sorting error, ', err);
+          }
         });
 
       });
@@ -372,6 +380,20 @@ module.exports.default = class extends Plugin {
       if(this.runs[login]) {
         this.runs[login] += ',' + checkpoint.timeOrScore;
       }
+    }
+  }
+
+
+
+  displayRecords() {
+    if (this.records) {
+      var text = '$39fDedimania Records on $<$fff' + this.maps.current.name + '$>$39f (' + (this.records.length - 1) + '): ';
+
+      for(var recordPos = 0; (recordPos < 5 && recordPos < this.records.length); recordPos++) {
+        text += '$fff' + (recordPos + 1) + '$39f. $<$fff' + this.records[recordPos].NickName + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[recordPos].Best) + '$39f] ';
+      }
+
+      this.server.send().chat(text).exec();
     }
   }
 };
