@@ -7,6 +7,15 @@ import { EventEmitter } from 'events';
 /**
  * Plugin Interface
  * @class Plugin
+ *
+ * @property {App} app
+ * @property {[]} plugins
+ * @property {ServerClient} server
+ * @property {Players} players
+ * @property {Maps} maps
+ * @property {{}} models
+ * @property {{}} config
+ *
  */
 export default class extends EventEmitter {
 
