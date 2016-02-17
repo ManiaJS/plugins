@@ -15,6 +15,7 @@ import { EventEmitter } from 'events';
  * @property {Maps} maps
  * @property {{}} models
  * @property {{}} config
+ * @property {UIFacade} ui
  *
  */
 export default class extends EventEmitter {
@@ -58,5 +59,6 @@ export default class extends EventEmitter {
     this.players = app.players;
     this.maps = app.maps;
     this.plugins = app.plugins;
+    this.ui = app.ui;
   }
 }
