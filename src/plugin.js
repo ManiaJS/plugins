@@ -115,7 +115,7 @@ export default class extends Plugin {
         var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f';
 
         if(this.records.length > 0) {
-          localRecords += ' (' + (this.records.length - 1) + '): ';
+          localRecords += ' (' + this.records.length + '): ';
           for (var recordPos = 0; (recordPos < 10 && recordPos < this.records.length && recordPos < this.recordlimit); recordPos++) {
             localRecords += '$fff' + (recordPos + 1) + '$39f. $<$fff' + this.records[recordPos].Player.nickname + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[recordPos].score) + '$39f] ';
           }
@@ -130,7 +130,7 @@ export default class extends Plugin {
           var record = this.records.filter(function (rec) {
             return rec.PlayerId == player.id;
           });
-          var text = '$090You currently do not have a Local Record on this map.';
+          var text = '$090You do not have a Local Record on this map.';
 
           if (record.length == 1) {
             record = record[0];
