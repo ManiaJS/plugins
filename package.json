@@ -1,11 +1,11 @@
 {
   "name": "maniajs-welcome",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": false,
   "main": "lib/plugin.js",
   "scripts": {
     "prepublish": "npm run build",
-    "build": "babel src -d lib"
+    "build": "babel src -d lib --copy-files"
   },
   "dependencies": {
     "maniajs-plugin": "0.*"
