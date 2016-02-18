@@ -183,7 +183,7 @@ export default class extends Plugin {
               improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 gained the $fff' + (newIndex) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
                   '$090 ($fff' + (previousIndex) + '$090. $fff' + this.app.util.times.stringTime(previousTime) + '$090/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$090)!';
             } else {
-              improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 improved his/her $fff' + (newIndex) + '$090., with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
+              improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 improved his/her $fff' + (newIndex) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
                   '$090 ($fff' + this.app.util.times.stringTime(previousTime) + '$090/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$090).';
             }
 
