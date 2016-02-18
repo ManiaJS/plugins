@@ -112,10 +112,15 @@ export default class extends Plugin {
       this.records = records.sort((a, b) => a.score - b.score);
 
       if(this.chatdisplay) {
-        var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f (' + (this.records.length - 1) + '): ';
+        var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f';
 
-        for (var recordPos = 0; (recordPos < 10 && recordPos < this.records.length && recordPos < this.recordlimit); recordPos++) {
-          localRecords += '$fff' + (recordPos + 1) + '$39f. $<$fff' + this.records[recordPos].Player.nickname + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[recordPos].score) + '$39f] ';
+        if(this.records.length > 0) {
+          localRecords += ' (' + (this.records.length - 1) + '): ';
+          for (var recordPos = 0; (recordPos < 10 && recordPos < this.records.length && recordPos < this.recordlimit); recordPos++) {
+            localRecords += '$fff' + (recordPos + 1) + '$39f. $<$fff' + this.records[recordPos].Player.nickname + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[recordPos].score) + '$39f] ';
+          }
+        } else {
+          localRecords += ': $fffno records yet.';
         }
 
         this.server.send().chat(localRecords).exec();
