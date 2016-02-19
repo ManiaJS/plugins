@@ -3,10 +3,6 @@
   "version": "0.0.0",
   "private": false,
   "main": "src/plugin.js",
-  "scripts": {
-    "n-prepublish": "npm run build",
-    "n-build": "babel src -d lib"
-  },
   "dependencies": {
     "maniajs-plugin": "0.*",
     "xmlrpc": "^1.3.1"
