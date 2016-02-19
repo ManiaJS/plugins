@@ -2,6 +2,25 @@
   "name": "maniajs-dedimania",
   "version": "0.0.0",
   "private": false,
+
+  "description": "ManiaJS Plugin - Dedimania Plugin",
+  "keywords": ["maniajs", "maniaplanet", "trackmania", "plugin", "dedimania"],
+  "bugs": {
+    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+  },
+  "license": "ISC",
+
+  "contributors": [
+    {
+      "name": "Tom Valk",
+      "email": "tomvalk@lt-box.info"
+    }
+  ],
+  "repository": "ManiaJS/maniajs-dedimania",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+
   "main": "src/plugin.js",
   "dependencies": {
     "maniajs-plugin": "0.*",
