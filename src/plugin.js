@@ -40,6 +40,11 @@ export default class extends Plugin {
       this.server.on('map.begin',
         (params) => this.loadVotes(params));
 
+      this.server.on('player.connect', (params) => {
+        let player = this.players.list[params.login];
+        this.displayVotes(player);
+      });
+
       this.server.command.on('skip', 1, (player, params) => {
         this.server.send().chat("$fffSkipping map...").exec();
         this.server.send().custom('NextMap').exec();
