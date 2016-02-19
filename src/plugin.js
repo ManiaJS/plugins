@@ -2,7 +2,7 @@
 
 // Make our own plugin main interface an event emitter.
 // This can be used to communicate and subscribe to others plugins events.
-import { EventEmitter } from 'events';
+var EventEmitter = require('events').EventEmitter;
 
 /**
  * Plugin Interface
@@ -18,7 +18,7 @@ import { EventEmitter } from 'events';
  * @property {UIFacade} ui
  *
  */
-export default class extends EventEmitter {
+module.exports = class extends EventEmitter {
 
   /**
    * Construct the plugin.
@@ -61,4 +61,4 @@ export default class extends EventEmitter {
     this.plugins = app.plugins;
     this.ui = app.ui;
   }
-}
+};
