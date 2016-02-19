@@ -1,11 +1,14 @@
 {
   "name": "maniajs-plugin",
-  "version": "0.1.0",
+  "version": "0.2.0-0",
   "private": false,
   "main": "src/plugin.js",
-
   "description": "Plugin Interface for ManiaJS Plugin Structure",
-  "keywords": ["maniajs", "plugin", "interface"],
+  "keywords": [
+    "maniajs",
+    "plugin",
+    "interface"
+  ],
   "bugs": {
     "url": "https://github.com/ManiaJS/ManiaJS/issues"
   },
