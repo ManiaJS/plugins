@@ -8,7 +8,7 @@ var Plugin      = require('maniajs-plugin').default;
 /**
  * LocalRecords Plugin.
  */
-export default class extends Plugin {
+module.exports.default = class extends Plugin {
 
   constructor() {
     super();
