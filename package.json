@@ -10,5 +10,14 @@
     "url": "https://github.com/ManiaJS/ManiaJS/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-plugin"
+  "repository": "ManiaJS/maniajs-plugin",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "contributors": [
+    {
+      "name": "Tom Valk",
+      "email": "tomvalk@lt-box.info"
+    }
+  ]
 }
