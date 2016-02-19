@@ -1,6 +1,6 @@
 'use strict';
 
-export default function (sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
   let Karma = sequelize.define('Karma', {
     score: DataTypes.INTEGER
   }, {
@@ -12,4 +12,4 @@ export default function (sequelize, DataTypes) {
   Karma.belongsTo(sequelize.model('Player'));
 
   return Karma;
-}
+};

@@ -32,8 +32,3 @@ node_modules
 ### App Specific
 config.yaml
 database.sqlite
-
-
-### Babel Output
-/lib/*
-!/lib/.gitkeep

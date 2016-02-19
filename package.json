@@ -2,16 +2,8 @@
   "name": "maniajs-karma",
   "version": "0.0.0",
   "private": false,
-  "main": "lib/plugin.js",
-  "scripts": {
-    "prepublish": "npm run build",
-    "build": "npm i --only=dev --ignore-scripts && babel src -d lib"
-  },
+  "main": "src/plugin.js",
   "dependencies": {
     "maniajs-plugin": "0.*"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.5.1",
-    "babel-preset-es2015": "^6.5.0"
   }
 }
