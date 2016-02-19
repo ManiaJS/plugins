@@ -23,7 +23,6 @@ module.exports.default = class extends Plugin {
 
     // Plugin properties
     this.votes = null;
-    this.currentScore = 0;
     this.plusVotes = 0;
     this.minVotes = 0;
   }
@@ -91,17 +90,14 @@ module.exports.default = class extends Plugin {
       include: [Player]
     }).then((votes) => {
       this.votes = votes;
-      this.currentScore = 0;
       this.plusVotes = 0;
       this.minVotes = 0;
 
       this.votes.forEach((vote) => {
         if(vote.score == 1) {
           this.plusVotes++;
-          this.currentScore++;
         } else if(vote.score == -1) {
           this.minVotes++;
-          this.currentScore--;
         }
       });
 
@@ -118,8 +114,8 @@ module.exports.default = class extends Plugin {
    * @param player
    */
   displayVotes(player) {
-    var chatKarma = '$ff0Current map karma: $fff' + this.currentScore;
-    chatKarma += '$ff0 [$fff' + this.votes.length + '$ff0 votes - ++: $fff' + this.plusVotes + '$ff0 ($fff' + Math.round(((this.plusVotes/this.votes.length) * 100)) + '%$ff0)';
+    var chatKarma = '$ff0Current map karma: $fff' + (this.plusVotes - this.minVotes);
+    chatKarma += '$ff0 [$fff' + this.votes.length + '$ff0 votes, ++: $fff' + this.plusVotes + '$ff0 ($fff' + Math.round(((this.plusVotes/this.votes.length) * 100)) + '%$ff0)';
     chatKarma += ' --: $fff' + this.minVotes + '$ff0 ($fff' + Math.round(((this.minVotes/this.votes.length) * 100)) + '%$ff0)]';
 
     var playerVote = this.votes.filter(function (vote) {
@@ -175,6 +171,7 @@ module.exports.default = class extends Plugin {
 
       this.votes.push(newVote);
       newVote.save();
+      this.plusVotes++;
     }
 
     this.server.send().chat(voteResult, {destination: player.login}).exec();
@@ -214,6 +211,7 @@ module.exports.default = class extends Plugin {
 
       this.votes.push(newVote);
       newVote.save();
+      this.minVotes++;
     }
 
     this.server.send().chat(voteResult, {destination: player.login}).exec();
