@@ -39,7 +39,7 @@ export default class extends Plugin {
    */
   init() {
     return new Promise((resolve, reject) => {
-      if(!this.config) {
+      if(this.config) {
         if(this.config.hasOwnProperty('recordlimit') && this.config.recordlimit != '') {
           this.recordlimit = this.config.recordlimit;
         }
