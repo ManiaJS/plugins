@@ -130,13 +130,13 @@ export default class extends Plugin {
           var record = this.records.filter(function (rec) {
             return rec.PlayerId == player.id;
           });
-          var text = '$090You do not have a Local Record on this map.';
+          var text = '$0f3You do not have a Local Record on this map.';
 
           if (record.length == 1) {
             record = record[0];
             var recordIndex = (this.records.indexOf(record) + 1);
             if (recordIndex <= this.recordlimit) {
-              text = '$090Your current Local Record is: $fff' + recordIndex + '$090. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$090.';
+              text = '$0f3Your current Local Record is: $fff' + recordIndex + '$0f3. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$0f3.';
             }
           }
 
@@ -180,11 +180,11 @@ export default class extends Plugin {
 
             var improvedRecordText = '';
             if(newIndex < previousIndex) {
-              improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 gained the $fff' + (newIndex) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
-                  '$090 ($fff' + (previousIndex) + '$090. $fff' + this.app.util.times.stringTime(previousTime) + '$090/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$090)!';
+              improvedRecordText = '$0f3$<$fff' + player.nickname + '$>$0f3 gained the $fff' + (newIndex) + '$0f3. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
+                  '$0f3 ($fff' + (previousIndex) + '$0f3. $fff' + this.app.util.times.stringTime(previousTime) + '$0f3/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$0f3)!';
             } else {
-              improvedRecordText = '$090$<$fff' + player.nickname + '$>$090 improved his/her $fff' + (newIndex) + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
-                  '$090 ($fff' + this.app.util.times.stringTime(previousTime) + '$090/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$090).';
+              improvedRecordText = '$0f3$<$fff' + player.nickname + '$>$0f3 improved his/her $fff' + (newIndex) + '$0f3. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) +
+                  '$0f3 ($fff' + this.app.util.times.stringTime(previousTime) + '$0f3/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$0f3).';
             }
 
             if(newIndex <= this.displaylimit)
@@ -195,7 +195,7 @@ export default class extends Plugin {
         } else if(time == record[0].score) {
           if(this.chatannounce) {
             var equalledIndex = (this.records.indexOf(record[0]) + 1);
-            var equalledRecordText = '$090$<$fff' + player.nickname + '$>$090 equalled his/her $fff' + equalledIndex + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) + '$090...';
+            var equalledRecordText = '$0f3$<$fff' + player.nickname + '$>$0f3 equalled his/her $fff' + equalledIndex + '$0f3. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) + '$0f3...';
 
             if(equalledIndex <= this.displaylimit)
               this.server.send().chat(equalledRecordText).exec();
@@ -220,7 +220,7 @@ export default class extends Plugin {
 
         if(this.chatannounce) {
           var newRecordIndex = (this.records.indexOf(newRecord) + 1);
-          var newRecordText = '$090$<$fff' + player.nickname + '$>$090 drove the $fff' + newRecordIndex + '$090. Local Record, with a time of $fff' + this.app.util.times.stringTime(newRecord.score) + '$090!';
+          var newRecordText = '$0f3$<$fff' + player.nickname + '$>$0f3 drove the $fff' + newRecordIndex + '$0f3. Local Record, with a time of $fff' + this.app.util.times.stringTime(newRecord.score) + '$0f3!';
 
           if(newRecordIndex <= this.displaylimit)
             this.server.send().chat(newRecordText).exec();
