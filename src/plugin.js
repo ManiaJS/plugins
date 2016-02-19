@@ -61,6 +61,11 @@ export default class extends Plugin {
       this.server.on('map.begin',
         (params) => this.beginMap(params));
 
+      this.server.on('player.connect', (params) => {
+        let player = this.players.list[params.login];
+        this.playerRecord(player);
+      });
+
       this.server.on('trackmania.player.finish',
         (params) => this.playerFinish(params));
 
@@ -110,7 +115,13 @@ export default class extends Plugin {
         var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f';
 
         if(this.records.length > 0) {
-          localRecords += ' (' + this.records.length + '): ';
+          if(this.records.length < this.recordlimit) {
+            localRecords += ' (' + this.records.length + '): ';
+          }
+          else {
+            localRecords += ' (' + this.recordlimit + '): ';
+          }
+
           for (var recordPos = 0; (recordPos < 10 && recordPos < this.records.length && recordPos < this.recordlimit); recordPos++) {
             localRecords += '$fff' + (recordPos + 1) + '$39f. $<$fff' + this.records[recordPos].Player.nickname + '$>$39f [$fff' + this.app.util.times.stringTime(this.records[recordPos].score) + '$39f] ';
           }
@@ -122,23 +133,32 @@ export default class extends Plugin {
 
         Object.keys(this.players.list).forEach((login) => {
           let player = this.players.list[login];
-          var record = this.records.filter(function (rec) {
-            return rec.PlayerId == player.id;
-          });
-          var text = '$0f3You do not have a Local Record on this map.';
-
-          if (record.length == 1) {
-            record = record[0];
-            var recordIndex = (this.records.indexOf(record) + 1);
-            if (recordIndex <= this.recordlimit) {
-              text = '$0f3Your current Local Record is: $fff' + recordIndex + '$0f3. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$0f3.';
-            }
-          }
-
-          this.server.send().chat(text, {destination: login}).exec();
+          this.playerRecord(player);
         });
       }
     });
+  }
+
+  /**
+   * Displays the local record for the player.
+   *
+   * @param player
+   */
+  playerRecord(player) {
+    var record = this.records.filter(function (rec) {
+      return rec.PlayerId == player.id;
+    });
+    var text = '$0f3You do not have a Local Record on this map.';
+
+    if (record.length == 1) {
+      record = record[0];
+      var recordIndex = (this.records.indexOf(record) + 1);
+      if (recordIndex <= this.recordlimit) {
+        text = '$0f3Your current Local Record is: $fff' + recordIndex + '$0f3. with a time of $fff' + this.app.util.times.stringTime(record.score) + '$0f3.';
+      }
+    }
+
+    this.server.send().chat(text, {destination: player.login}).exec();
   }
 
   /**
