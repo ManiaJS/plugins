@@ -67,11 +67,6 @@ export default class extends Plugin {
       this.server.on('trackmania.player.checkpoint',
         (params) => this.playerCheckpoint(params));
 
-      this.server.command.on('skip', 1, (player, params) => {
-        this.server.send().chat("$fffSkipping map...").exec();
-        this.server.send().skip().exec();
-      });
-
       this.loadRecords(this.maps.current).then(() => {
         resolve();
       }).catch((err) => {
