@@ -1,6 +1,6 @@
 'use strict';
 
-export default function (sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
   let LocalRecord = sequelize.define('LocalRecord', {
     /*mapId: {
       type: DataTypes.INTEGER,
