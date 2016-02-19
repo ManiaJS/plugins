@@ -2,16 +2,15 @@
   "name": "maniajs-welcome",
   "version": "0.0.1",
   "private": false,
-  "main": "lib/plugin.js",
-  "scripts": {
-    "prepublish": "npm run build",
-    "build": "babel src -d lib --copy-files"
+  "description": "ManiaJS Plugin - Welcome Plugin, will welcome your players on the server.",
+  "keywords": ["maniajs", "maniaplanet", "trackmania", "shootmania", "plugin", "welcome"],
+  "bugs": {
+    "url": "https://github.com/ManiaJS/ManiaJS/issues"
   },
+  "license": "ISC",
+  "repository": "ManiaJS/maniajs-welcome",
+  "main": "src/plugin.js",
   "dependencies": {
     "maniajs-plugin": "0.*"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.5.1",
-    "babel-preset-es2015": "^6.5.0"
   }
 }

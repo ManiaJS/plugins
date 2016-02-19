@@ -1,9 +1,9 @@
 'use strict';
 
-import * as Package from './../package.json';
-import * as path from 'path';
+var Package     = require('./../package.json');
+var path        = require('path');
 
-import Plugin from 'maniajs-plugin';
+var Plugin      = require('maniajs-plugin').default;
 
 /**
  * LocalRecords Plugin.
