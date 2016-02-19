@@ -224,7 +224,7 @@ export default class extends Plugin {
 
           if(newRecordIndex <= this.displaylimit)
             this.server.send().chat(newRecordText).exec();
-          else
+          else if(newRecordIndex <= this.recordlimit)
             this.server.send().chat(newRecordText, {destination: login}).exec();
         }
 
