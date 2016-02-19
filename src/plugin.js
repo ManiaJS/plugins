@@ -18,7 +18,7 @@ var EventEmitter = require('events').EventEmitter;
  * @property {UIFacade} ui
  *
  */
-module.exports = class extends EventEmitter {
+module.exports.default = class extends EventEmitter {
 
   /**
    * Construct the plugin.
