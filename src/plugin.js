@@ -116,7 +116,7 @@ module.exports.default = class extends Plugin {
       text_color: 'FFFF',
 
       top_width: this.widgetWidth - 0.8,
-      top_height: (this.widgetTopCount * 1.8) + 0.3,
+      top_height: (this.widgetTopCount * 1.8) + 0.2,
       top_style: 'BgsPlayerCard',
       top_substyle: 'BgCardSystem'
     };
@@ -269,7 +269,7 @@ module.exports.default = class extends Plugin {
     var widgetSettings = this.widgetSettings;
     var records = [];
     var index = 1;
-    var x = -3;
+    var y = -3;
 
     // Check if player has a record on this map.
     var record = this.records.filter(function (rec) { return rec.PlayerId == player.id; });
@@ -281,11 +281,21 @@ module.exports.default = class extends Plugin {
         index: index,
         score: this.app.util.times.stringTime(record.score),
         nickname: record.Player.nickname,
-        x: x,
-        marked: (record.Player.login == player.login)
+        y: y,
+        marked: false,
+        player: (record.Player.login == player.login),
+        top_y: (y + 0.35),
+        top_width: this.widgetWidth - 0.8,
+        top_style: 'BgsPlayerCard',
+        top_substyle: 'BgCardSystem',
+        playericon_box_x: (this.widgetSettings.widget_x < 0) ? this.widgetSettings.width : -2,
+        playericon_x: (this.widgetSettings.widget_x < 0) ? (this.widgetSettings.width + 0.2) : -1.8,
+        playericon_box_y: (y + 0.35),
+        playericon_y: (y + 0.15),
+        playericon: (this.widgetSettings.widget_x < 0) ? 'ShowLeft2' : 'ShowRight2'
       });
 
-      x = x - 1.8;
+      y = y - 1.8;
       index++;
     });
 
@@ -303,7 +313,7 @@ module.exports.default = class extends Plugin {
       var recordIndex = (this.records.indexOf(record[0]) + 1);
       if(recordIndex <= this.widgetTopCount) {
         beginSlice = this.widgetTopCount;
-        endSlice = (this.widgetEntries = this.widgetTopCount);
+        endSlice = (this.widgetEntries);
       } else {
         var indexToTop = recordIndex - this.widgetTopCount;
         var indexToEnd = listEnd - recordIndex;
@@ -314,6 +324,12 @@ module.exports.default = class extends Plugin {
           // Enough records on both sides
           beginSlice = (recordIndex - topTest);
           endSlice = (recordIndex + (sliceSpace - topTest));
+        } else if(indexToTop < topTest) {
+          beginSlice = this.widgetTopCount;
+          endSlice = this.widgetEntries;
+        } else if(indexToEnd < (this.widgetEntries - topTest)) {
+          beginSlice = (listEnd - (this.widgetEntries - this.widgetTopCount));
+          endSlice = listEnd;
         }
       }
     }
@@ -324,11 +340,21 @@ module.exports.default = class extends Plugin {
         index: index,
         score: this.app.util.times.stringTime(record.score),
         nickname: record.Player.nickname,
-        x: x,
-        marked: (record.Player.login == player.login)
+        y: y,
+        player: (record.Player.login == player.login),
+        marked: (record.Player.login == player.login),
+        top_y: (y + 0.35),
+        top_width: this.widgetWidth - 0.8,
+        top_style: 'BgsPlayerCard',
+        top_substyle: 'BgCardSystem',
+        playericon_box_x: (this.widgetSettings.widget_x < 0) ? this.widgetSettings.width : -2,
+        playericon_x: (this.widgetSettings.widget_x < 0) ? (this.widgetSettings.width + 0.2) : -1.8,
+        playericon_box_y: (y + 0.35),
+        playericon_y: (y + 0.15),
+        playericon: (this.widgetSettings.widget_x < 0) ? 'ShowLeft2' : 'ShowRight2'
       });
 
-      x = x - 1.8;
+      y = y - 1.8;
       index++;
     });
 
@@ -337,12 +363,8 @@ module.exports.default = class extends Plugin {
         index: '-',
         score: '--:--.---',
         nickname: player.nickname,
-        x: x,
-        marked: true,
-        top_x: (x + 0.3),
-        top_width: this.widgetWidth - 0.8,
-        top_style: 'BgsPlayerCard',
-        top_substyle: 'BgCardSystem'
+        y: y,
+        marked: false
       });
     }
 

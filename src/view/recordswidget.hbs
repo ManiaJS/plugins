@@ -14,11 +14,15 @@
         <quad posn="0.4 -2.6 0.004" sizen="{{top_width}} {{top_height}}" style="{{top_style}}" substyle="{{top_substyle}}"/>
 
         {{#each records}}
-            {{#if marked}}
-                <quad posn="0.4 {{top_x}} 0.004" sizen="{{top_width}} 2.0" style="{{top_style}}" substyle="{{top_substyle}}"/>
+            {{#if player}}
+                <quad posn="{{playericon_box_x}} {{playericon_box_y}} 0.004" sizen="2 1.95" style="BgsPlayerCard" substyle="BgCardSystem"/>
+                <quad posn="{{playericon_x}} {{playericon_y}} 0.005" sizen="1.6 1.6" style="Icons64x64_1" substyle="{{playericon}}"/>
             {{/if}}
-            <label posn="2.3 {{x}} 0.005" sizen="1.7 1.7" halign="right" scale="0.9" text="{{index}}."/>
-            <label posn="6 {{x}} 0.005" sizen="3.9 1.7" halign="right" scale="0.9" textcolor="FFFF" text="{{score}}"/>
-            <label posn="6.2 {{x}} 0.005" sizen="9.50 1.7" scale="0.9" text="{{nickname}}"/>
+            {{#if marked}}
+                <quad posn="0.4 {{top_y}} 0.004" sizen="{{top_width}} 1.95" style="{{top_style}}" substyle="{{top_substyle}}"/>
+            {{/if}}
+            <label posn="2.3 {{y}} 0.005" sizen="1.7 1.7" halign="right" scale="0.9" text="{{index}}."/>
+            <label posn="6 {{y}} 0.005" sizen="3.9 1.7" halign="right" scale="0.9" textcolor="FFFF" text="{{score}}"/>
+            <label posn="6.2 {{y}} 0.005" sizen="9.50 1.7" scale="0.9" text="{{nickname}}"/>
         {{/each}}
     </frame>
