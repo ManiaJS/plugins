@@ -148,7 +148,9 @@ module.exports.default = class extends Plugin {
         }
       }
 
+      // UI
       this.recordsWidget = this.app.ui.build(this, 'recordswidget', 1);
+      this.recordsWidget.global(this.widgetSettings);
 
       // Event
       this.server.on('map.begin',
@@ -266,7 +268,6 @@ module.exports.default = class extends Plugin {
    * @param player
    */
   displayRecordsWidget(player) {
-    var widgetSettings = this.widgetSettings;
     var records = [];
     var index = 1;
     var y = -3;
@@ -369,8 +370,7 @@ module.exports.default = class extends Plugin {
     }
 
     // Set records and send ManiaLink.
-    widgetSettings.records = records;
-    this.recordsWidget.player(player.login, widgetSettings).update();
+    this.recordsWidget.player(player.login, {records: records}).update();
   }
 
   /**
