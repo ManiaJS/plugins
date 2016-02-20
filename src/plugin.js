@@ -43,6 +43,20 @@ module.exports.default = class extends Plugin {
       this.sayHi(player, params);
     });
 
+
+    this.fake = [];
+    this.server.command.on('fake', 'connect fake player', (player, params) => {
+      for (var i = 0; i < 220; i++) {
+        this.server.send().custom('ConnectFakePlayer').exec()
+          .then((login) => {
+            fake.append(login);
+          });
+      }
+    });
+    this.server.command.on('unfake', 'disconnect fake player', (player, params) => {
+      this.server.send().custom('DisconnectFakePlayer', ['*']).exec();
+    });
+
     return Promise.resolve();
   }
 
