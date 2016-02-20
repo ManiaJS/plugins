@@ -8,7 +8,8 @@ var EventEmitter = require('events').EventEmitter;
  * Plugin Interface
  * @class Plugin
  *
- * @property {App} app
+ * @property {App} app App Context.
+ * @property {Logger|{}} log Plugin Logging Instance (bunyan).
  * @property {[]} plugins
  * @property {ServerClient} server
  * @property {Players} players
@@ -48,10 +49,12 @@ module.exports.default = class extends EventEmitter {
    *
    * @param {App} app App context.
    * @param {object} config Plugin config.
+   * @param {Logger|{}} log Child Logger.
    */
-  inject(app, config) {
+  inject(app, config, log) {
     this.app = app;
     this.config = config;
+    this.log = log;
 
     this.server = app.server;
 
