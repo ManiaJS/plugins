@@ -39,14 +39,10 @@ module.exports.default = class extends Plugin {
         this.playerDisconnect(params);
       });
 
-
       // Commands
       this.server.command.on('welcome', 1, (player, params) => {
         this.server.send().chat('Welcome command!').exec();
       });
-
-      // UI
-      this.sampleUi = this.app.ui.build(this, 'sample');
 
       resolve();
     });
@@ -59,12 +55,6 @@ module.exports.default = class extends Plugin {
     if (detail) {
       this.server.send().chat('Welcome ' + detail.nickname + '$z$fff to the server!').exec();
     }
-
-    let data = {
-      test: 'Welc' + player.login
-    };
-
-    this.sampleUi.player(player.login, data).update();
   }
 
   playerDisconnect(player) {
@@ -74,4 +64,4 @@ module.exports.default = class extends Plugin {
       this.server.send().chat('Player ' + detail.nickname + '$z$fff disconnected!').exec();
     }
   }
-}
+};
