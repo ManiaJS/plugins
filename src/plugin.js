@@ -30,8 +30,13 @@ module.exports.default = class extends Plugin {
     this.chatdisplay = true;
     this.chatannounce = true;
 
+    this.widgetEnabled = true;
     this.widgetEntries = 16;
     this.widgetTopCount = 3;
+    this.widgetWidth = 15.5;
+    this.widgetHeight = ((1.8 * this.widgetEntries) + 3.2);
+    this.widgetX = 49.2;
+    this.widgetY = 28.2;
 
     this.sideSettings = {
       left: {
@@ -66,23 +71,20 @@ module.exports.default = class extends Plugin {
       }
     };
 
-    this.widgetWidth = 15.5;
-    var widgetHeight = ((1.8 * this.widgetEntries) + 3.2);
-    var widgetX = 49.2;
-    var widgetY = 28.2;
-
     this.widgetSettings = {
       manialinkid: 'LocalRecords',
       actionid: 'OpenLocalRecords',
+      title: 'Local Records',
+
       width: this.widgetWidth,
-      height: widgetHeight,
-      column_height: (widgetHeight - 3.1),
-      widget_x: widgetX,
-      widget_y: widgetY,
+      height: this.widgetHeight,
+      column_height: (this.widgetHeight - 3.1),
+      widget_x: this.widgetX,
+      widget_y: this.widgetY,
       background_width: (this.widgetWidth - 0.2),
-      background_height: (widgetHeight - 0.2),
+      background_height: (this.widgetHeight - 0.2),
       border_width: (this.widgetWidth + 0.4),
-      border_height: (widgetHeight + 0.6),
+      border_height: (this.widgetHeight + 0.6),
       column_width_name: (this.widgetWidth - 6.45),
 
       background_color: '3342',
@@ -96,20 +98,19 @@ module.exports.default = class extends Plugin {
       border_style: 'Bgs1',
       border_substyle: 'BgTitleShadow',
 
-      image_open_x: (widgetX < 0) ? this.sideSettings.right.image_open.x + (this.widgetWidth - 15.5) : this.sideSettings.left.image_open.x,
-      image_open_y: -(widgetHeight - 3.18),
-      image_open: (widgetX < 0) ? this.sideSettings.right.image_open.image : this.sideSettings.left.image_open.image,
+      image_open_x: (this.widgetX < 0) ? this.sideSettings.right.image_open.x + (this.widgetWidth - 15.5) : this.sideSettings.left.image_open.x,
+      image_open_y: -(this.widgetHeight - 3.18),
+      image_open: (this.widgetX < 0) ? this.sideSettings.right.image_open.image : this.sideSettings.left.image_open.image,
 
-      title: 'Local Records',
       title_background_width: (this.widgetWidth - 0.8),
       title_style: 'BgsPlayerCard',
       title_substyle: 'BgRacePlayerName',
-      title_x: (widgetX < 0) ? this.sideSettings.right.title.x + (this.widgetWidth - 15.5) : this.sideSettings.left.title.x,
-      title_y: (widgetX < 0) ? this.sideSettings.right.title.y : this.sideSettings.left.title.y,
-      title_halign: (widgetX < 0) ? this.sideSettings.right.title.halign : this.sideSettings.left.title.halign,
+      title_x: (this.widgetX < 0) ? this.sideSettings.right.title.x + (this.widgetWidth - 15.5) : this.sideSettings.left.title.x,
+      title_y: (this.widgetX < 0) ? this.sideSettings.right.title.y : this.sideSettings.left.title.y,
+      title_halign: (this.widgetX < 0) ? this.sideSettings.right.title.halign : this.sideSettings.left.title.halign,
 
-      icon_x: (widgetX < 0) ? this.sideSettings.right.icon.x + (this.widgetWidth - 15.5) : this.sideSettings.left.icon.x,
-      icon_y: (widgetX < 0) ? this.sideSettings.right.icon.y : this.sideSettings.left.icon.y,
+      icon_x: (this.widgetX < 0) ? this.sideSettings.right.icon.x + (this.widgetWidth - 15.5) : this.sideSettings.left.icon.x,
+      icon_y: (this.widgetX < 0) ? this.sideSettings.right.icon.y : this.sideSettings.left.icon.y,
       icon_style: 'BgRaceScore2',
       icon_substyle: 'LadderRank',
 
@@ -131,21 +132,7 @@ module.exports.default = class extends Plugin {
   init() {
     return new Promise((resolve, reject) => {
       if(this.config) {
-        if(this.config.hasOwnProperty('recordlimit') && this.config.recordlimit != '') {
-          this.recordlimit = this.config.recordlimit;
-        }
-
-        if(this.config.hasOwnProperty('displaylimit') && this.config.displaylimit != '') {
-          this.displaylimit = this.config.displaylimit;
-        }
-
-        if(this.config.hasOwnProperty('chatdisplay') && this.config.chatdisplay != '') {
-          this.chatdisplay = this.config.chatdisplay;
-        }
-
-        if(this.config.hasOwnProperty('chatannounce') && this.config.chatannounce != '') {
-          this.chatannounce = this.config.chatannounce;
-        }
+        this.setupConfig();
       }
 
       // UI
@@ -159,6 +146,7 @@ module.exports.default = class extends Plugin {
       this.server.on('player.connect', (params) => {
         let player = this.players.list[params.login];
         this.playerRecord(player);
+        this.displayRecordsWidget(player);
       });
 
       this.server.on('trackmania.player.finish',
@@ -167,17 +155,58 @@ module.exports.default = class extends Plugin {
       this.server.on('trackmania.player.checkpoint',
         (params) => this.playerCheckpoint(params));
 
-      this.server.command.on('update', 1, (player, params) => {
-        let plyr = this.players.list[player.login];
-        this.displayRecordsWidget(plyr);
-      });
-
       this.loadRecords(this.maps.current).then(() => {
         resolve();
       }).catch((err) => {
         reject(err);
       });
     });
+  }
+
+  /**
+   * Set up all configuration options.
+   */
+  setupConfig() {
+    if(this.config.hasOwnProperty('recordlimit') && this.config.recordlimit != '') {
+      this.recordlimit = this.config.recordlimit;
+    }
+
+    if(this.config.hasOwnProperty('displaylimit') && this.config.displaylimit != '') {
+      this.displaylimit = this.config.displaylimit;
+    }
+
+    if(this.config.hasOwnProperty('chatdisplay') && this.config.chatdisplay != '') {
+      this.chatdisplay = this.config.chatdisplay;
+    }
+
+    if(this.config.hasOwnProperty('chatannounce') && this.config.chatannounce != '') {
+      this.chatannounce = this.config.chatannounce;
+    }
+
+    if(this.config.hasOwnProperty('widgetenabled' && this.config.widgetenabled != '')) {
+      this.widgetEnabled = this.config.widgetenabled;
+    }
+
+    if(this.config.hasOwnProperty('widgetentries') && this.config.widgetentries != '') {
+      this.widgetEntries = this.config.widgetentries;
+      this.widgetHeight = ((1.8 * this.widgetEntries) + 3.2);
+    }
+
+    if(this.config.hasOwnProperty('widgettopcount') && this.config.widgettopcount != '') {
+      this.widgetTopCount = this.config.widgettopcount;
+    }
+
+    if(this.config.hasOwnProperty('widgetwidth') && this.config.widgetwidth != '') {
+      this.widgetWidth = this.config.widgetwidth;
+    }
+
+    if(this.config.hasOwnProperty('widgetx') && this.config.widgetx != '') {
+      this.widgetX = this.config.widgetx;
+    }
+
+    if(this.config.hasOwnProperty('widgety') && this.config.widgety != '') {
+      this.widgetY = this.config.widgety;
+    }
   }
 
   /**
@@ -235,6 +264,11 @@ module.exports.default = class extends Plugin {
           let player = this.players.list[login];
           this.playerRecord(player);
         });
+
+        Object.keys(this.players.list).forEach((login) => {
+          let player = this.players.list[login];
+          this.displayRecordsWidget(player);
+        });
       }
     });
   }
@@ -259,7 +293,6 @@ module.exports.default = class extends Plugin {
     }
 
     this.server.send().chat(text, {destination: player.login}).exec();
-    this.displayRecordsWidget(player);
   }
 
   /**
@@ -268,6 +301,8 @@ module.exports.default = class extends Plugin {
    * @param player
    */
   displayRecordsWidget(player) {
+    if(!this.widgetEnabled) return;
+
     var records = [];
     var index = 1;
     var y = -3;
