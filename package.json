@@ -1,0 +1,23 @@
+{
+  "name": "maniajs-help",
+  "version": "0.0.0",
+  "private": false,
+  "description": "ManiaJS Plugin - Help Plugin, ManiaJS and Command Help.",
+  "keywords": [
+    "maniajs",
+    "maniaplanet",
+    "trackmania",
+    "shootmania",
+    "plugin",
+    "help"
+  ],
+  "bugs": {
+    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+  },
+  "license": "ISC",
+  "repository": "ManiaJS/maniajs-help",
+  "main": "src/plugin.js",
+  "dependencies": {
+    "maniajs-plugin": "0.*"
+  }
+}
