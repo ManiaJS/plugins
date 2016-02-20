@@ -219,8 +219,8 @@ module.exports.default = class extends Plugin {
    */
   displayVotes(player) {
     var chatKarma = '$ff0Current map karma: $fff' + (this.plusVotes - this.minVotes);
-    chatKarma += '$ff0 [$fff' + this.votes.length + '$ff0 votes, ++: $fff' + this.plusVotes + '$ff0 ($fff' + parseFloat(((this.plusVotes/this.votes.length) * 100)).toFixed(1) + '%$ff0)';
-    chatKarma += ' --: $fff' + this.minVotes + '$ff0 ($fff' + parseFloat(((this.minVotes/this.votes.length) * 100)).toFixed(1) + '%$ff0)]';
+    chatKarma += '$ff0 [$fff' + this.votes.length + '$ff0 votes, ++: $fff' + this.plusVotes + '$ff0 ($fff' + (parseFloat(((this.plusVotes/this.votes.length) * 100)).toFixed(1) || 0) + '%$ff0)';
+    chatKarma += ' --: $fff' + this.minVotes + '$ff0 ($fff' + (parseFloat(((this.minVotes/this.votes.length) * 100)).toFixed(1) || 0) + '%$ff0)]';
 
     var playerVote = this.votes.filter(function (vote) {
       return vote.PlayerId == player.id;
