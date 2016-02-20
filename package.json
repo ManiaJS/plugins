@@ -1,0 +1,9 @@
+{
+  "name": "maniajs-mapwidget",
+  "version": "0.0.0",
+  "private": false,
+  "main": "src/plugin.js",
+  "dependencies": {
+    "maniajs-plugin": "0.*"
+  }
+}
