@@ -29,6 +29,97 @@ module.exports.default = class extends Plugin {
     this.displaylimit = 50;
     this.chatdisplay = true;
     this.chatannounce = true;
+
+    this.widgetEntries = 16;
+    this.widgetTopCount = 3;
+
+    this.sideSettings = {
+      left: {
+        icon: {
+          x: 0.6,
+          y: 0
+        },
+        title: {
+          x: 3.2,
+          y: -0.65,
+          halign: 'left'
+        },
+        image_open: {
+          x: -0.3,
+          image: 'http://static.undef.name/ingame/records-eyepiece/edge-open-ld-dark.png'
+        }
+      },
+      right: {
+        icon: {
+          x: 12.5,
+          y: 0
+        },
+        title: {
+          x: 12.4,
+          y: -0.65,
+          halign: 'right'
+        },
+        image_open: {
+          x: 12.2,
+          image: 'http://static.undef.name/ingame/records-eyepiece/edge-open-rd-dark.png'
+        }
+      }
+    };
+
+    this.widgetWidth = 15.5;
+    var widgetHeight = ((1.8 * this.widgetEntries) + 3.2);
+    var widgetX = 49.2;
+    var widgetY = 28.2;
+
+    this.widgetSettings = {
+      manialinkid: 'LocalRecords',
+      actionid: 'OpenLocalRecords',
+      width: this.widgetWidth,
+      height: widgetHeight,
+      column_height: (widgetHeight - 3.1),
+      widget_x: widgetX,
+      widget_y: widgetY,
+      background_width: (this.widgetWidth - 0.2),
+      background_height: (widgetHeight - 0.2),
+      border_width: (this.widgetWidth + 0.4),
+      border_height: (widgetHeight + 0.6),
+      column_width_name: (this.widgetWidth - 6.45),
+
+      background_color: '3342',
+      background_focus: '09F6',
+      background_rank: '09F5',
+      background_score: '09F3',
+      background_name: '09F1',
+
+      background_style: 'Bgs1',
+      background_substyle: 'BgTitleGlow',
+      border_style: 'Bgs1',
+      border_substyle: 'BgTitleShadow',
+
+      image_open_x: (widgetX < 0) ? this.sideSettings.right.image_open.x + (this.widgetWidth - 15.5) : this.sideSettings.left.image_open.x,
+      image_open_y: -(widgetHeight - 3.18),
+      image_open: (widgetX < 0) ? this.sideSettings.right.image_open.image : this.sideSettings.left.image_open.image,
+
+      title: 'Local Records',
+      title_background_width: (this.widgetWidth - 0.8),
+      title_style: 'BgsPlayerCard',
+      title_substyle: 'BgRacePlayerName',
+      title_x: (widgetX < 0) ? this.sideSettings.right.title.x + (this.widgetWidth - 15.5) : this.sideSettings.left.title.x,
+      title_y: (widgetX < 0) ? this.sideSettings.right.title.y : this.sideSettings.left.title.y,
+      title_halign: (widgetX < 0) ? this.sideSettings.right.title.halign : this.sideSettings.left.title.halign,
+
+      icon_x: (widgetX < 0) ? this.sideSettings.right.icon.x + (this.widgetWidth - 15.5) : this.sideSettings.left.icon.x,
+      icon_y: (widgetX < 0) ? this.sideSettings.right.icon.y : this.sideSettings.left.icon.y,
+      icon_style: 'BgRaceScore2',
+      icon_substyle: 'LadderRank',
+
+      text_color: 'FFFF',
+
+      top_width: this.widgetWidth - 0.8,
+      top_height: (this.widgetTopCount * 1.8) + 0.3,
+      top_style: 'BgsPlayerCard',
+      top_substyle: 'BgCardSystem'
+    };
   }
 
   /**
@@ -57,6 +148,8 @@ module.exports.default = class extends Plugin {
         }
       }
 
+      this.recordsWidget = this.app.ui.build(this, 'recordswidget', 1);
+
       // Event
       this.server.on('map.begin',
         (params) => this.beginMap(params));
@@ -71,6 +164,11 @@ module.exports.default = class extends Plugin {
 
       this.server.on('trackmania.player.checkpoint',
         (params) => this.playerCheckpoint(params));
+
+      this.server.command.on('update', 1, (player, params) => {
+        let plyr = this.players.list[player.login];
+        this.displayRecordsWidget(plyr);
+      });
 
       this.loadRecords(this.maps.current).then(() => {
         resolve();
@@ -159,6 +257,98 @@ module.exports.default = class extends Plugin {
     }
 
     this.server.send().chat(text, {destination: player.login}).exec();
+    this.displayRecordsWidget(player);
+  }
+
+  /**
+   * Display records widget for player.
+   *
+   * @param player
+   */
+  displayRecordsWidget(player) {
+    var widgetSettings = this.widgetSettings;
+    var records = [];
+    var index = 1;
+    var x = -3;
+
+    // Check if player has a record on this map.
+    var record = this.records.filter(function (rec) { return rec.PlayerId == player.id; });
+    var hasRecord = !(record.length == 0 || (this.records.indexOf(record[0]) + 1) > this.recordlimit);
+
+    // Input the top of the widget with the best records
+    this.records.slice(0, this.widgetTopCount).forEach((record) => {
+      records.push({
+        index: index,
+        score: this.app.util.times.stringTime(record.score),
+        nickname: record.Player.nickname,
+        x: x,
+        marked: (record.Player.login == player.login)
+      });
+
+      x = x - 1.8;
+      index++;
+    });
+
+    var listEnd = (this.records.length > this.recordlimit) ? this.recordlimit : this.records.length;
+    var beginSlice = 0;
+    var endSlice = 0;
+    if(!hasRecord) {
+      // Has no record, display last records.
+      beginSlice = (listEnd - (this.widgetEntries - this.widgetTopCount) + 1);
+      if(beginSlice < this.widgetTopCount) {
+        beginSlice = this.widgetTopCount;
+      }
+      endSlice = listEnd;
+    } else {
+      var recordIndex = (this.records.indexOf(record[0]) + 1);
+      if(recordIndex <= this.widgetTopCount) {
+        beginSlice = this.widgetTopCount;
+        endSlice = (this.widgetEntries = this.widgetTopCount);
+      } else {
+        var indexToTop = recordIndex - this.widgetTopCount;
+        var indexToEnd = listEnd - recordIndex;
+        var sliceSpace = (this.widgetEntries - this.widgetTopCount);
+
+        var topTest = Math.round(sliceSpace / 2);
+        if (indexToTop >= topTest && indexToEnd >= (this.widgetEntries - topTest)) {
+          // Enough records on both sides
+          beginSlice = (recordIndex - topTest);
+          endSlice = (recordIndex + (sliceSpace - topTest));
+        }
+      }
+    }
+
+    index = (beginSlice + 1);
+    this.records.slice(beginSlice, endSlice).forEach((record) => {
+      records.push({
+        index: index,
+        score: this.app.util.times.stringTime(record.score),
+        nickname: record.Player.nickname,
+        x: x,
+        marked: (record.Player.login == player.login)
+      });
+
+      x = x - 1.8;
+      index++;
+    });
+
+    if(!hasRecord) {
+      records.push({
+        index: '-',
+        score: '--:--.---',
+        nickname: player.nickname,
+        x: x,
+        marked: true,
+        top_x: (x + 0.3),
+        top_width: this.widgetWidth - 0.8,
+        top_style: 'BgsPlayerCard',
+        top_substyle: 'BgCardSystem'
+      });
+    }
+
+    // Set records and send ManiaLink.
+    widgetSettings.records = records;
+    this.recordsWidget.player(player.login, widgetSettings).update();
   }
 
   /**
@@ -173,6 +363,7 @@ module.exports.default = class extends Plugin {
     if(time > 0) {
       let player = this.players.list[login];
       var record = this.records.filter(function (rec) { return rec.PlayerId == player.id; });
+      var updateWidget = false;
 
       if (record.length == 1) {
         // Already has a local record
@@ -202,6 +393,8 @@ module.exports.default = class extends Plugin {
                   '$0f3 ($fff' + this.app.util.times.stringTime(previousTime) + '$0f3/$fff-' + this.app.util.times.stringTime((previousTime - record[0].score)) + '$0f3).';
             }
 
+            updateWidget = true;
+
             if(newIndex <= this.displaylimit)
               this.server.send().chat(improvedRecordText).exec();
             else if(newIndex <= this.recordlimit)
@@ -211,6 +404,8 @@ module.exports.default = class extends Plugin {
           if(this.chatannounce) {
             var equalledIndex = (this.records.indexOf(record[0]) + 1);
             var equalledRecordText = '$0f3$<$fff' + player.nickname + '$>$0f3 equalled his/her $fff' + equalledIndex + '$0f3. Local Record, with a time of $fff' + this.app.util.times.stringTime(record[0].score) + '$0f3...';
+
+            updateWidget = true;
 
             if(equalledIndex <= this.displaylimit)
               this.server.send().chat(equalledRecordText).exec();
@@ -243,7 +438,15 @@ module.exports.default = class extends Plugin {
             this.server.send().chat(newRecordText, {destination: login}).exec();
         }
 
+        updateWidget = true;
         newRecord.save();
+      }
+
+      if(updateWidget) {
+        Object.keys(this.players.list).forEach((login) => {
+          let player = this.players.list[login];
+          this.displayRecordsWidget(player);
+        });
       }
     }
   }

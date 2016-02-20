@@ -1,0 +1,24 @@
+    <frame posn="{{widget_x}} {{widget_y}} 0" id="Widget{{manialinkid}}">
+        <label posn="0.1 -0.1 0" sizen="{{background_width}} {{background_height}}" action="{{actionid}}" text=" " focusareacolor1="{{background_color}}" focusareacolor2="{{background_focus}}"/>
+        <quad posn="-0.2 0.3 0.001" sizen="{{border_width}} {{border_height}}" style="{{border_style}}" substyle="{{border_substyle}}"/>
+        <quad posn="0 0 0.002" sizen="{{width}} {{height}}" style="{{background_style}}" substyle="{{background_substyle}}"/>
+        <quad posn="0.4 -2.6 0.003" sizen="2 {{column_height}}" bgcolor="{{background_rank}}"/>
+        <quad posn="2.4 -2.6 0.003" sizen="3.65 {{column_height}}" bgcolor="{{background_score}}"/>
+        <quad posn="6.05 -2.6 0.003" sizen="{{column_width_name}} {{column_height}}" bgcolor="{{background_name}}"/>
+        <quad posn="{{image_open_x}} {{image_open_y}} 0.05" sizen="3.5 3.5" image="{{image_open}}"/>
+
+        <quad posn="0.4 -0.36 0.003" sizen="{{title_background_width}} 2" style="{{title_style}}" substyle="{{title_substyle}}"/>
+        <quad posn="{{icon_x}} {{icon_y}} 0.004" sizen="2.5 2.5" style="{{icon_style}}" substyle="{{icon_substyle}}"/>
+        <label posn="{{title_x}} {{title_y}} 0.004" sizen="10.2 0" halign="{{title_halign}}" textsize="1" text="{{title}}"/>
+        <format textsize="1" textcolor="{{text_color}}"/>
+        <quad posn="0.4 -2.6 0.004" sizen="{{top_width}} {{top_height}}" style="{{top_style}}" substyle="{{top_substyle}}"/>
+
+        {{#each records}}
+            {{#if marked}}
+                <quad posn="0.4 {{top_x}} 0.004" sizen="{{top_width}} 2.0" style="{{top_style}}" substyle="{{top_substyle}}"/>
+            {{/if}}
+            <label posn="2.3 {{x}} 0.005" sizen="1.7 1.7" halign="right" scale="0.9" text="{{index}}."/>
+            <label posn="6 {{x}} 0.005" sizen="3.9 1.7" halign="right" scale="0.9" textcolor="FFFF" text="{{score}}"/>
+            <label posn="6.2 {{x}} 0.005" sizen="9.50 1.7" scale="0.9" text="{{nickname}}"/>
+        {{/each}}
+    </frame>
