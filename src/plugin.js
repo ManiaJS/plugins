@@ -3,6 +3,8 @@
 var Package = require('./../package.json');
 var path    = require('path');
 
+var async   = require('async');
+
 var Plugin  = require('maniajs-plugin').default;
 
 /**
@@ -405,7 +407,7 @@ module.exports.default = class extends Plugin {
     }
 
     // Set records and send ManiaLink.
-    this.recordsWidget.player(player.login, {records: records}).update();
+    return this.recordsWidget.player(player.login, {records: records}).update();
   }
 
   /**
@@ -500,9 +502,14 @@ module.exports.default = class extends Plugin {
       }
 
       if(updateWidget) {
-        Object.keys(this.players.list).forEach((login) => {
+        console.log('Update each...');
+        async.each(Object.keys(this.players.list), (login, callback) => {
           let player = this.players.list[login];
-          this.displayRecordsWidget(player);
+          this.displayRecordsWidget(player)
+            .then(() => callback())
+            .catch((err) => callback(err));
+        }, (err) => {
+          console.log('Update DONE!');
         });
       }
     }

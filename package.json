@@ -3,9 +3,14 @@
   "version": "0.0.0",
   "private": false,
   "main": "src/plugin.js",
-
   "description": "ManiaJS Plugin - LocalRecords Plugin",
-  "keywords": ["maniajs", "maniaplanet", "trackmania", "plugin", "localrecords"],
+  "keywords": [
+    "maniajs",
+    "maniaplanet",
+    "trackmania",
+    "plugin",
+    "localrecords"
+  ],
   "bugs": {
     "url": "https://github.com/ManiaJS/ManiaJS/issues"
   },
@@ -14,8 +19,8 @@
   "engines": {
     "node": ">=4.0.0"
   },
-
   "dependencies": {
+    "async": "^1.5.2",
     "maniajs-plugin": "0.*"
   }
 }
