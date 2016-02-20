@@ -440,11 +440,11 @@ module.exports.default = class extends Plugin {
         var newRecord = this.models.LocalRecord.build({
           score: time,
           Map: this.maps.current,
-          Player: player,
           MapId: this.maps.current.id,
           PlayerId: player.id
         });
 
+        newRecord.Player = player;
         newRecord.checkpoints = this.runs[login]? this.runs[login] : '';
 
         this.records.push(newRecord);
