@@ -23,6 +23,10 @@ module.exports.default = class extends Plugin {
     // Add dependencies, enter module full id's (mostly npm package names) here.
     this.dependencies = [];
 
+    // Game Requirements
+    this.game.games = ['trackmania']; // Only for trackmania
+    this.game.modes = [1, 2, 3, 4, 5]; // rounds,timeattack,team,laps,cup
+
     // Plugin properties
     this.records = null;
     this.runs = [];
