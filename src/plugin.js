@@ -51,7 +51,7 @@ module.exports.default = class extends EventEmitter {
      */
     this.game = {
       modes: [],
-      game: ['trackmania', 'shootmania']
+      games: ['trackmania', 'shootmania']
     }
   }
 
