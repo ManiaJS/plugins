@@ -18,6 +18,8 @@ var EventEmitter = require('events').EventEmitter;
  * @property {{}} config
  * @property {UIFacade} ui
  *
+ * @property {{modes: number[], game: string[]}} game
+ *
  */
 module.exports.default = class extends EventEmitter {
 
@@ -42,6 +44,15 @@ module.exports.default = class extends EventEmitter {
      * @type {{}}
      */
     this.models = {};
+
+    /**
+     * Game Requirements.
+     * @type {{modes: number[], game: string[]}}
+     */
+    this.game = {
+      modes: [],
+      game: ['trackmania', 'shootmania']
+    }
   }
 
   /**
