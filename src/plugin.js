@@ -1,13 +1,16 @@
 'use strict';
 
 var Package = require('./../package.json');
-var path = require('path');
-var xmlrpc = require('xmlrpc');
+var path    = require('path');
+var xmlrpc  = require('xmlrpc');
 
-var Plugin = require('maniajs-plugin').default;
+var Plugin  = require('maniajs-plugin').default;
 
 /**
  * DediMania Plugin.
+ *
+ * @property {object} serverInfo
+ * @property {number} serverInfo.ServerMaxRank
  */
 module.exports.default = class extends Plugin {
 
@@ -22,6 +25,10 @@ module.exports.default = class extends Plugin {
     // Add dependencies, enter module full id's (mostly npm package names) here.
     this.dependencies = [];
 
+    // Game Requirements
+    this.game.games = ['trackmania']; // Only for trackmania
+    this.game.modes = [1, 2, 3, 4, 5]; // rounds,timeattack,team,laps,cup
+
     // Plugin properties
     this.client = null;
     this.session = null;
@@ -32,12 +39,111 @@ module.exports.default = class extends Plugin {
     this.newRecords = []; // Holds newly driven records. (queue to send to the dedimania server).
     this.playerInfo = []; // Holds info like max record limit and if banned, etc.
 
+    // Server Record Limit
+    this.serverInfo = {};
+    this.displaylimit = 50;
+
+    this.chatdisplay = true;
+    this.chatannounce = true;
+
     this.host = 'dedimania.net';
     this.port = 8082;
     this.path = '/Dedimania';
 
-
     this.timerUpdate = null;
+
+    // Widget
+    this.widgetEnabled = true;
+    this.widgetEntries = 16;
+    this.widgetTopCount = 3;
+    this.widgetWidth = 15.5;
+    this.widgetHeight = ((1.8 * this.widgetEntries) + 3.2);
+    this.widgetX = -64.2;
+    this.widgetY = 28.2;
+
+    this.sideSettings = {
+      left: {
+        icon: {
+          x: 0.6,
+          y: 0
+        },
+        title: {
+          x: 3.2,
+          y: -0.65,
+          halign: 'left'
+        },
+        image_open: {
+          x: -0.3,
+          image: 'http://static.undef.name/ingame/records-eyepiece/edge-open-ld-dark.png'
+        }
+      },
+      right: {
+        icon: {
+          x: 12.5,
+          y: 0
+        },
+        title: {
+          x: 12.4,
+          y: -0.65,
+          halign: 'right'
+        },
+        image_open: {
+          x: 12.2,
+          image: 'http://static.undef.name/ingame/records-eyepiece/edge-open-rd-dark.png'
+        }
+      }
+    };
+
+    this.widgetSettings = {
+      manialinkid: 'DedimaniaRecords',
+      actionid: 'OpenDedimaniaRecords',
+      title: 'Dedimania Records',
+
+      width: this.widgetWidth,
+      height: this.widgetHeight,
+      column_height: (this.widgetHeight - 3.1),
+      widget_x: this.widgetX,
+      widget_y: this.widgetY,
+      background_width: (this.widgetWidth - 0.2),
+      background_height: (this.widgetHeight - 0.2),
+      border_width: (this.widgetWidth + 0.4),
+      border_height: (this.widgetHeight + 0.6),
+      column_width_name: (this.widgetWidth - 6.45),
+
+      background_color: '3342',
+      background_focus: '09F6',
+      background_rank: '09F5',
+      background_score: '09F3',
+      background_name: '09F1',
+
+      background_style: 'Bgs1',
+      background_substyle: 'BgTitleGlow',
+      border_style: 'Bgs1',
+      border_substyle: 'BgTitleShadow',
+
+      image_open_x: (this.widgetX < 0) ? this.sideSettings.right.image_open.x + (this.widgetWidth - 15.5) : this.sideSettings.left.image_open.x,
+      image_open_y: -(this.widgetHeight - 3.18),
+      image_open: (this.widgetX < 0) ? this.sideSettings.right.image_open.image : this.sideSettings.left.image_open.image,
+
+      title_background_width: (this.widgetWidth - 0.8),
+      title_style: 'BgsPlayerCard',
+      title_substyle: 'BgRacePlayerName',
+      title_x: (this.widgetX < 0) ? this.sideSettings.right.title.x + (this.widgetWidth - 15.5) : this.sideSettings.left.title.x,
+      title_y: (this.widgetX < 0) ? this.sideSettings.right.title.y : this.sideSettings.left.title.y,
+      title_halign: (this.widgetX < 0) ? this.sideSettings.right.title.halign : this.sideSettings.left.title.halign,
+
+      icon_x: (this.widgetX < 0) ? this.sideSettings.right.icon.x + (this.widgetWidth - 15.5) : this.sideSettings.left.icon.x,
+      icon_y: (this.widgetX < 0) ? this.sideSettings.right.icon.y : this.sideSettings.left.icon.y,
+      icon_style: 'BgRaceScore2',
+      icon_substyle: 'LadderRank',
+
+      text_color: 'FFFF',
+
+      top_width: this.widgetWidth - 0.8,
+      top_height: (this.widgetTopCount * 1.8) + 0.2,
+      top_style: 'BgsPlayerCard',
+      top_substyle: 'BgCardSystem'
+    };
   }
 
   /**
@@ -61,11 +167,21 @@ module.exports.default = class extends Plugin {
         path: this.path
       });
 
+      // UI
+      this.recordsWidget = this.app.ui.build(this, 'recordswidget', 1);
+      this.recordsWidget.global(this.widgetSettings);
+
       // Events
       this.server.on('map.begin',
         (params) => this.beginMap(params));
       this.server.on('map.end',
         (params) => this.endMap(params));
+
+      this.server.on('player.connect', (params) => {
+        let player = this.players.list[params.login];
+        this.playerRecord(player);
+        this.displayRecordsWidget(player);
+      });
 
       // Open Session
       return this.openSession().then((sessionId) => {
@@ -75,8 +191,11 @@ module.exports.default = class extends Plugin {
 
         return this.server.send().custom('GetCurrentMapInfo').exec();
       }).then((res) => {
-        this.loadRecords(res);
-        return resolve();
+        return this.loadRecords(res);
+      }).then(() => {
+        return this.displayRecords();
+      }).then(() => {
+        this.displayPersonalRecords();
       }).catch((err) => {
         this.app.log.error(err);
         return reject(err);
@@ -210,7 +329,17 @@ module.exports.default = class extends Plugin {
     this.runs = [];
 
     // Load Dedimania Records
-    this.loadRecords(map);
+    this.loadRecords(map)
+      .then(() => {
+        console.error('jkadfsadfhjskladfhjskldfhjksldsfhjkladfhjksladfhjsklhjklsjkadfsladhjksfladsfadsklfhjasdf');
+        console.error('jkadfsadfhjskladfhjskldfhjksldsfhjkladfhjksladfhjsklhjklsjkadfsladhjksfladsfadsklfhjasdf');
+        console.error('jkadfsadfhjskladfhjskldfhjksldsfhjkladfhjksladfhjsklhjklsjkadfsladhjksfladsfadsklfhjasdf');
+        console.error('jkadfsadfhjskladfhjskldfhjksldsfhjkladfhjksladfhjsklhjklsjkadfsladhjksfladsfadsklfhjasdf');
+        return this.displayRecords();
+      })
+      .then(() => {
+        this.displayPersonalRecords();
+      });
 
     // Set timer.
     this.timerUpdate = setInterval(() => {
@@ -246,8 +375,17 @@ module.exports.default = class extends Plugin {
           NbLaps: map.NbLaps
         };
 
-        let game = 'TA';
-        // TODO: Script.
+        var game = 'TA';
+        if (this.server.currentMode() === 1) {
+          game = 'Rounds';
+        } else if (this.server.currentMode() === 2) {
+          game = 'TA';
+
+        } else {
+          this.log.warn('Current mode not supported by Dedimania!');
+          return reject(new Error('Current GameMode not supported!'));
+        } // TODO: Scripted tm.
+
 
         let options = this.server.options;
         let server = {
@@ -282,19 +420,27 @@ module.exports.default = class extends Plugin {
             return reject(err);
           }
 
-          console.log(res);
-
           if (! res) {
             this.records = [];
           }
 
+          // Player Infos. (will have infos about max rank/banned).
+          this.playerInfo = []; // Clear first.
+          res.Players.forEach((player) => {
+            this.playerInfo[player.Login] = player;
+          });
+
           this.records = res.Records;
+          this.serverInfo.ServerMaxRank = res.ServerMaxRank;
+          this.serverInfo.AllowedGameModes = res.AllowedGameModes;
+
           try {
             this.records = this.records.sort((a, b) => a.Best - b.Best);
-            this.displayRecords();
           } catch (err) {
             this.app.log.warn('Dedimania: Sorting error, ', err);
           }
+
+          return resolve(this.records);
         });
 
       });
@@ -388,6 +534,13 @@ module.exports.default = class extends Plugin {
 
 
 
+
+
+
+
+
+
+
   displayRecords() {
     if (this.records) {
       var text = '$39fDedimania Records on $<$fff' + this.maps.current.name + '$>$39f (' + (this.records.length - 1) + '): ';
@@ -398,5 +551,158 @@ module.exports.default = class extends Plugin {
 
       this.server.send().chat(text).exec();
     }
+  }
+
+
+
+
+  displayPersonalRecords () {
+    Object.keys(this.players.list).forEach((login) => {
+      let player = this.players.list[login];
+      this.displayTextualRecord(player);
+      this.displayRecordsWidget(player);
+    });
+  }
+
+  /**
+   * Displays the dedimania record for the player.
+   *
+   * @param player
+   */
+  displayTextualRecord (player) {
+    var text = '$0f3You do not have a Dedimania Record on this map.';
+
+    var record = [];
+    if (this.records.length > 0) {
+      record = this.records.filter(function (rec) {
+        return rec.Login == player.login;
+      });
+    }
+
+    if (record.length == 1) {
+      record = record[0];
+      var recordIndex = (this.records.indexOf(record) + 1);
+      text = '$0f3Your current Dedimania Record is: $fff' + recordIndex + '$0f3. with a time of $fff' + this.app.util.times.stringTime(record.Best) + '$0f3.';
+    }
+
+    this.server.send().chat(text, {destination: player.login}).exec();
+  }
+
+
+
+
+
+
+  /**
+   * Display records widget for player.
+   *
+   * @param player
+   */
+  displayRecordsWidget(player) {
+    if(!this.widgetEnabled) return;
+
+    var records = [];
+    var index = 1;
+    var y = -3;
+
+    // Check if player has a record on this map.
+    var record = this.records.filter(function (rec) { return rec.Login == player.login; });
+    var hasRecord = !(record.length == 0 || (this.records.indexOf(record[0]) + 1) > this.recordlimit);
+
+    // Input the top of the widget with the best records
+    this.records.slice(0, this.widgetTopCount).forEach((record) => {
+      records.push({
+        index: index,
+        score: this.app.util.times.stringTime(record.Best),
+        nickname: record.NickName,
+        y: y,
+        marked: false,
+        player: (record.Login == player.login),
+        top_y: (y + 0.35),
+        top_width: this.widgetWidth - 0.8,
+        top_style: 'BgsPlayerCard',
+        top_substyle: 'BgCardSystem',
+        playericon_box_x: (this.widgetSettings.widget_x < 0) ? this.widgetSettings.width : -2,
+        playericon_x: (this.widgetSettings.widget_x < 0) ? (this.widgetSettings.width + 0.2) : -1.8,
+        playericon_box_y: (y + 0.35),
+        playericon_y: (y + 0.15),
+        playericon: (this.widgetSettings.widget_x < 0) ? 'ShowLeft2' : 'ShowRight2'
+      });
+
+      y = y - 1.8;
+      index++;
+    });
+
+    var listEnd = (this.records.length > this.recordlimit) ? this.recordlimit : this.records.length;
+    var beginSlice = 0;
+    var endSlice = 0;
+    if(!hasRecord) {
+      // Has no record, display last records.
+      beginSlice = (listEnd - (this.widgetEntries - this.widgetTopCount) + 1);
+      if(beginSlice < this.widgetTopCount) {
+        beginSlice = this.widgetTopCount;
+      }
+      endSlice = listEnd;
+    } else {
+      var recordIndex = (this.records.indexOf(record[0]) + 1);
+      if(recordIndex <= this.widgetTopCount) {
+        beginSlice = this.widgetTopCount;
+        endSlice = (this.widgetEntries);
+      } else {
+        var indexToTop = recordIndex - this.widgetTopCount;
+        var indexToEnd = listEnd - recordIndex;
+        var sliceSpace = (this.widgetEntries - this.widgetTopCount);
+
+        var topTest = Math.round(sliceSpace / 2);
+        if (indexToTop >= topTest && indexToEnd >= (this.widgetEntries - topTest)) {
+          // Enough records on both sides
+          beginSlice = (recordIndex - topTest);
+          endSlice = (recordIndex + (sliceSpace - topTest));
+        } else if(indexToTop < topTest) {
+          beginSlice = this.widgetTopCount;
+          endSlice = this.widgetEntries;
+        } else if(indexToEnd < (this.widgetEntries - topTest)) {
+          beginSlice = (listEnd - (this.widgetEntries - this.widgetTopCount));
+          endSlice = listEnd;
+        }
+      }
+    }
+
+    index = (beginSlice + 1);
+    this.records.slice(beginSlice, endSlice).forEach((record) => {
+      records.push({
+        index: index,
+        score: this.app.util.times.stringTime(record.Best),
+        nickname: record.NickName,
+        y: y,
+        player: (record.Login == player.login),
+        marked: (record.Login == player.login),
+        top_y: (y + 0.35),
+        top_width: this.widgetWidth - 0.8,
+        top_style: 'BgsPlayerCard',
+        top_substyle: 'BgCardSystem',
+        playericon_box_x: (this.widgetSettings.widget_x < 0) ? this.widgetSettings.width : -2,
+        playericon_x: (this.widgetSettings.widget_x < 0) ? (this.widgetSettings.width + 0.2) : -1.8,
+        playericon_box_y: (y + 0.35),
+        playericon_y: (y + 0.15),
+        playericon: (this.widgetSettings.widget_x < 0) ? 'ShowLeft2' : 'ShowRight2'
+      });
+
+      y = y - 1.8;
+      index++;
+    });
+
+    if(!hasRecord) {
+      records.push({
+        index: '-',
+        score: '--:--.---',
+        nickname: player.nickname,
+        y: y,
+        marked: false
+      });
+    }
+
+    // Set records and send ManiaLink.
+    return this.recordsWidget.player(player.login, {records: records}).update();
   }
 };
