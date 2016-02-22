@@ -27,8 +27,6 @@ module.exports.default = class extends Plugin {
     this.minVotes = 0;
 
     this.widgetEnabled = true;
-    this.widgetEntries = 16;
-    this.widgetTopCount = 3;
     this.widgetWidth = 15.5;
     this.widgetHeight = 11;
     this.widgetX = 49.2;
@@ -138,11 +136,6 @@ module.exports.default = class extends Plugin {
         this.server.send().custom('RestartMap').exec();
       });
 
-      this.server.command.on('update', 1, (player, params) => {
-        let plyr = this.players.list[player.login];
-        this.displayKarmaWidget(plyr);
-      });
-
       // UI
       this.karmaWidget = this.app.ui.build(this, 'karmawidget', 1);
       this.karmaWidget.global(this.widgetSettings);
@@ -218,9 +211,17 @@ module.exports.default = class extends Plugin {
    * @param player
    */
   displayVotes(player) {
+    var plusPercentage = parseFloat(((this.plusVotes/this.votes.length) * 100)).toFixed(1);
+    if(Number.isNaN(plusPercentage))
+      plusPercentage = 0;
+
+    var minPercentage = parseFloat(((this.minVotes/this.votes.length) * 100)).toFixed(1);
+    if(Number.isNaN(minPercentage))
+      minPercentage = 0;
+
     var chatKarma = '$ff0Current map karma: $fff' + (this.plusVotes - this.minVotes);
-    chatKarma += '$ff0 [$fff' + this.votes.length + '$ff0 votes, ++: $fff' + this.plusVotes + '$ff0 ($fff' + (parseFloat(((this.plusVotes/this.votes.length) * 100)).toFixed(1) || 0) + '%$ff0)';
-    chatKarma += ' --: $fff' + this.minVotes + '$ff0 ($fff' + (parseFloat(((this.minVotes/this.votes.length) * 100)).toFixed(1) || 0) + '%$ff0)]';
+    chatKarma += '$ff0 [$fff' + this.votes.length + '$ff0 votes, ++: $fff' + this.plusVotes + '$ff0 ($fff' + plusPercentage + '%$ff0)';
+    chatKarma += ' --: $fff' + this.minVotes + '$ff0 ($fff' + minPercentage + '%$ff0)]';
 
     var playerVote = this.votes.filter(function (vote) {
       return vote.PlayerId == player.id;
@@ -275,11 +276,15 @@ module.exports.default = class extends Plugin {
     var karma = (currentKarma < 0) ? '$f00' : '$0f0+';
     karma += currentKarma;
 
+    var karmaPercentage = parseFloat(((this.plusVotes/this.votes.length) * 100)).toFixed(1);
+    if(Number.isNaN(karmaPercentage))
+      karmaPercentage = 0;
+
     var widgetOptions = {
       votebars: votebars,
       positivevotes: this.plusVotes,
       negativevotes: this.minVotes,
-      karmapercentage: parseFloat(((this.plusVotes/this.votes.length) * 100)).toFixed(1),
+      karmapercentage: karmaPercentage,
       karma: karma,
       positive: false,
       negative: false
