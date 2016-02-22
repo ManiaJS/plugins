@@ -144,6 +144,10 @@ module.exports.default = class extends Plugin {
       // UI
       this.recordsWidget = this.app.ui.build(this, 'recordswidget', 1);
       this.recordsWidget.global(this.widgetSettings);
+      this.recordsWidget.on('OpenLocalRecords', (data) => {
+        let player = this.players.list[data.login];
+        this.displayList(player);
+      });
 
       // Event
       this.server.on('map.begin',
@@ -160,6 +164,8 @@ module.exports.default = class extends Plugin {
 
       this.server.on('trackmania.player.checkpoint',
         (params) => this.playerCheckpoint(params));
+
+      this.server.command.on('records', 'List of Local Records', (player) => this.displayList(player));
 
       this.loadRecords(this.maps.current).then(() => {
         resolve();
@@ -302,6 +308,45 @@ module.exports.default = class extends Plugin {
   }
 
   /**
+   * Displays the records list to the player.
+   *
+   * @param player
+   */
+  displayList(player) {
+    let cols = [
+      {
+        name: '#',
+        field: 'index',
+        width: 10,
+        level: 0
+      },
+      {
+        name: 'Nickname',
+        field: 'nickname',
+        width: 120,
+        level: 0
+      },
+      {
+        name: 'Time',
+        field: 'time',
+        width: 40,
+        level: 0
+      }
+    ];
+    var data = [];
+    for (var recordPos = 0; (recordPos < this.records.length && recordPos < this.recordlimit); recordPos++) {
+      data.push({
+        index: (recordPos + 1),
+        nickname: this.records[recordPos].Player.nickname,
+        time: this.app.util.times.stringTime(this.records[recordPos].score)
+      });
+    }
+
+    let list = this.app.ui.list('Local Records on ' + this.maps.current.name, player.login, cols, data);
+    list.display();
+  }
+
+  /**
    * Display records widget for player.
    *
    * @param player
@@ -314,14 +359,15 @@ module.exports.default = class extends Plugin {
     var y = -3;
 
     // Check if player has a record on this map.
-    var record = this.records.filter(function (rec) { return rec.PlayerId == player.id; });
-    var hasRecord = !(record.length == 0 || (this.records.indexOf(record[0]) + 1) > this.recordlimit);
+    var playerRecord = this.records.filter(function (rec) { return rec.PlayerId == player.id; });
+    var hasRecord = !(playerRecord.length == 0 || (this.records.indexOf(playerRecord[0]) + 1) > this.recordlimit);
 
     // Input the top of the widget with the best records
     this.records.slice(0, this.widgetTopCount).forEach((record) => {
       records.push({
         index: index,
         score: this.app.util.times.stringTime(record.score),
+        scorecolor: (record.Player.login == player.login) ? '0F3F' : 'FF0F',
         nickname: record.Player.nickname,
         y: y,
         marked: false,
@@ -352,7 +398,7 @@ module.exports.default = class extends Plugin {
       }
       endSlice = listEnd;
     } else {
-      var recordIndex = (this.records.indexOf(record[0]) + 1);
+      var recordIndex = (this.records.indexOf(playerRecord[0]) + 1);
       if(recordIndex <= this.widgetTopCount) {
         beginSlice = this.widgetTopCount;
         endSlice = (this.widgetEntries);
@@ -378,9 +424,25 @@ module.exports.default = class extends Plugin {
 
     index = (beginSlice + 1);
     this.records.slice(beginSlice, endSlice).forEach((record) => {
+      var scorecolor = 'FFFF';
+      if(!hasRecord) {
+        scorecolor = 'F00F';
+      } else {
+        if(record.Player.login == player.login) {
+          scorecolor = '0F3F';
+        } else {
+          if(record.score < playerRecord[0].score) {
+            scorecolor = 'F00F';
+          } else {
+            scorecolor = '888F';
+          }
+        }
+      }
+
       records.push({
         index: index,
         score: this.app.util.times.stringTime(record.score),
+        scorecolor: scorecolor,
         nickname: record.Player.nickname,
         y: y,
         player: (record.Player.login == player.login),
@@ -404,6 +466,7 @@ module.exports.default = class extends Plugin {
       records.push({
         index: '-',
         score: '--:--.---',
+        scorecolor: 'FFFF',
         nickname: player.nickname,
         y: y,
         marked: false
@@ -484,11 +547,10 @@ module.exports.default = class extends Plugin {
           MapId: this.maps.current.id,
           PlayerId: player.id
         });
-
-        newRecord.Player = player;
         newRecord.checkpoints = this.runs[login]? this.runs[login] : '';
 
         this.records.push(newRecord);
+        newRecord.Player = player;
         this.records = this.records.sort((a, b) => a.score - b.score);
 
         if(this.chatannounce) {
