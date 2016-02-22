@@ -136,9 +136,15 @@ module.exports.default = class extends Plugin {
         this.server.send().custom('RestartMap').exec();
       });
 
+      this.server.command.on('whokarma', 'List of Karma Votes', (player) => this.displayList(player));
+
       // UI
       this.karmaWidget = this.app.ui.build(this, 'karmawidget', 1);
       this.karmaWidget.global(this.widgetSettings);
+      this.karmaWidget.on('OpenKarma', (data) => {
+        let player = this.players.list[data.login];
+        this.displayList(player);
+      });
 
       this.server.command.on('++', 0, (player, params) => this.votePositive(player, false));
       this.server.command.on('--', 0, (player, params) => this.voteNegative(player, false));
@@ -203,6 +209,39 @@ module.exports.default = class extends Plugin {
         this.displayKarmaWidget(player);
       });
     });
+  }
+
+  /**
+   * Display list of karma votes to the player.
+   *
+   * @param player
+   */
+  displayList(player) {
+    let cols = [
+      {
+        name: 'Nickname',
+        field: 'nickname',
+        width: 120,
+        level: 0
+      },
+      {
+        name: 'Vote',
+        field: 'vote',
+        width: 40,
+        level: 0
+      }
+    ];
+    var data = [];
+    var votes = this.votes.sort((a, b) => b.score - a.score);
+    for (var vote = 0; vote < votes.length; vote++) {
+      data.push({
+        nickname: votes[vote].Player.nickname,
+        vote: (votes[vote].score == 1) ? '++' : '--'
+      });
+    }
+
+    let list = this.app.ui.list('Karma Votes on ' + this.maps.current.name, player.login, cols, data);
+    list.display();
   }
 
   /**
@@ -338,14 +377,14 @@ module.exports.default = class extends Plugin {
 
       var newVote = this.models.Karma.build({
         score: 1,
-        Map: this.maps.current,
-        Player: player,
         MapId: this.maps.current.id,
         PlayerId: player.id
       });
 
-      this.votes.push(newVote);
       newVote.save();
+      newVote.Player = player;
+      newVote.Map = this.maps.current;
+      this.votes.push(newVote);
       this.plusVotes++;
     }
 
