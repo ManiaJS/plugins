@@ -1,0 +1,26 @@
+{
+  "name": "maniajs-jukebox",
+  "version": "0.0.0",
+  "private": false,
+  "main": "src/plugin.js",
+  "description": "ManiaJS Plugin - Jukebox Plugin",
+  "keywords": [
+    "maniajs",
+    "maniaplanet",
+    "trackmania",
+    "plugin",
+    "jukebox"
+  ],
+  "bugs": {
+    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+  },
+  "license": "ISC",
+  "repository": "ManiaJS/maniajs-jukebox",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "dependencies": {
+    "async": "^1.5.2",
+    "maniajs-plugin": "0.*"
+  }
+}
