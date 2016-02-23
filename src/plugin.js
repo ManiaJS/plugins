@@ -127,11 +127,6 @@ module.exports.default = class extends Plugin {
         this.displayMapWidget(player);
       });
 
-      this.server.command.on('update', 1, (player, params) => {
-        let plyr = this.players.list[player.login];
-        this.displayMapWidget(plyr);
-      });
-
       // UI
       this.mapWidget = this.app.ui.build(this, 'mapwidget', 1);
       this.mapWidget.global(this.widgetSettings);
