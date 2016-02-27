@@ -4,6 +4,8 @@ var Package = require('./../package.json');
 
 var Plugin  = require('maniajs-plugin').default;
 
+var PlayerCommands = require('./player').default;
+
 /**
  * ManiaJS Admin Plugin.
  *
@@ -28,7 +30,9 @@ module.exports.default = class extends Plugin {
     this.game.modes = [];
 
     // Plugin Specific Variables
-
+    this.components = [
+      new PlayerCommands(this)
+    ];
   }
 
   /**
@@ -47,8 +51,14 @@ module.exports.default = class extends Plugin {
   }
 
   registerCommands () {
+    // Internal.
     this.server.command.on('setadmin', {admin: true, level: 3}, (player, params) => {
       this.handleSetAdmin(player, params);
+    });
+
+    // Components, register the commands.
+    this.components.forEach((component) => {
+      component.register(this.server.command); // Register commands.
     });
   }
 
