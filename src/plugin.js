@@ -76,7 +76,7 @@ module.exports.default = class extends Plugin {
       if (! this.server.command.commands.hasOwnProperty(command)) return;
       let options = this.server.command.commands[command];
 
-      if (details.level >= options.level && ! options.hide) {
+      if (details.level >= options.level && ! options.hide && ! options.admin) {
         // Display in the message.
         message += command + ', ';
       }
