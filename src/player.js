@@ -42,6 +42,61 @@ module.exports.default = class {
     }, (player, params) => this._kick(player, params));
 
 
+    //TODO
+    manager.on('ban', {
+      admin: true,
+      level: 2,
+      text: 'Ban a player with login or by id from /admin list'
+    }, (player, params) => this._ban(player, params));
+
+    manager.on('unban', {
+      admin: true,
+      level: 2,
+      text: 'Unban a player with login or by id from /admin list'
+    }, (player, params) => this._unban(player, params));
+
+    manager.on('forcespec', {
+      admin: true,
+      level: 1,
+      text: 'Force player with login to spectator.'
+    }, (player, params) => this._forcespec(player, params));
+
+    manager.on('forceplay', {
+      admin: true,
+      level: 1,
+      text: 'Force player with login to play.'
+    }, (player, params) => this._forceplay(player, params));
+
+    manager.on('mute', {
+      admin: true,
+      level: 1,
+      text: 'Mute player, this will block the player from using the chat and several commands.'
+    }, (player, params) => this._mute(player, params));
+
+    manager.on('unmute', {
+      admin: true,
+      level: 1,
+      text: 'Unmute player.'
+    }, (player, params) => this._unmute(player, params));
+
+    manager.on('addfake', {
+      admin: true,
+      level: 3,
+      text: 'Add fake players (bots).'
+    }, (player, params) => this._addfake(player, params));
+
+    manager.on('removefake', {
+      admin: true,
+      level: 3,
+      text: 'Remove fake player, /admin removefake [login] or ignore the login, and disconnect all fake players.'
+    }, (player, params) => this._removefake(player, params));
+
+
+    manager.on('balance', {
+      admin: true,
+      level: 1,
+      text: 'Force the autobalance to balance the teams.'
+    }, (player, params) => this._balance(player, params));
   }
 
 
