@@ -83,7 +83,7 @@ module.exports.default = class extends Plugin {
     let details = this.players.list[player.login] || false;
     if (! details || ! details.info) return;
 
-    var message = '$zCommands available: (/admin ...) $fff';
+    var message = '$zCommands available: ' + (adminCommands ? '(/admin ...) ' : '') + '$fff';
     let commands = Object.keys(this.server.command.commands);
 
     if (params.length > 0) {
@@ -99,7 +99,7 @@ module.exports.default = class extends Plugin {
         let command = this.server.command.commands[key];
         if (details.level >= command.level && !command.hide) {
           // Display help text
-          return this.server.send().chat('$zHelp for \'' + key.replace('__', ' ') + '\': $fff' + command.text, {destination: player.login}).exec();
+          return this.server.send().chat('$zHelp for \'' + key + '\': $fff' + command.text, {destination: player.login}).exec();
         }
       }
       return this.server.send().chat('Error, command help not found!', {destination: player.login}).exec();
@@ -112,12 +112,12 @@ module.exports.default = class extends Plugin {
 
       if (details.level >= options.level && ! options.hide && options.admin === adminCommands) {
         // Display in the message.
-        message += command.substr(7) + ', ';
+        message += (adminCommands ? command.substr(7) : command) + ', ';
       }
     });
 
     return this.server.send().chat(message, {destination: player.login}).exec()
-      .then(()=>this.server.send().chat('$zYou can also lookup specific command help by typing \'$fff/help [command]$g\'', {destination: player.login}).exec());
+      .then(()=>this.server.send().chat('$zYou can also lookup specific command help by typing \'$fff/' + (adminCommands ? 'admin ' : '') + 'help [command]$g\'', {destination: player.login}).exec());
   }
 
 
