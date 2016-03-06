@@ -146,7 +146,7 @@ module.exports.default = class Flow extends EventEmitter {
     if (! player || ! playerInfo) return;
 
     // Server Rank and Player Rank checking.
-    if ()
+    // TODO:
     console.log(player);
     console.log(playerInfo);
   }
