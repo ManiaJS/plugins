@@ -38,6 +38,9 @@ module.exports.default = class Flow extends EventEmitter {
 
     // Holds checkpoint runs.
     this.runs       = {}; // Indexed by login.
+
+    // TODO: Move to config.
+    this.displayLimit = 50;
   }
 
   init () {
@@ -169,10 +172,119 @@ module.exports.default = class Flow extends EventEmitter {
     let player = this.plugin.players.list[login] || false;
     let playerInfo = this.dedimania.playerData[login] || false;
     if (! player || ! playerInfo) return;
+    // < 6 seconds is not a valid ded record, server won't handle it!
+    if (time < 6000) return;
+    if (! type) return; // No improved, equal or new record!!
 
-    // Server Rank and Player Rank checking.
-    // TODO:
-    console.log(player);
-    console.log(playerInfo);
+    // Check if dedimania is active.
+    if (! this.active || ! this.dedimania.game.server.ServerMaxRank) {
+      this.plugin.log.debug('Current map not allowed, or server rank not known!');
+      return false;
+    }
+
+    let serverRank = parseInt(this.dedimania.game.server.ServerMaxRank);
+    let playerRank = parseInt(playerInfo.MaxRank);
+    let recordRank = parseInt(current ? current.MaxRank : 0);
+
+    if (isNaN(serverRank) || isNaN(playerRank) || isNaN(recordRank)) {
+      this.plugin.log.debug('Server, player or record max rank is NAN! Could not be parsed!!');
+      return false;
+    }
+
+    var maxRank = 0;
+
+    // Checking biggest max rank.
+    if (serverRank > playerRank) {
+      maxRank = serverRank;
+    } else {
+      maxRank = playerRank;
+    }
+    console.log(maxRank);
+
+    // Check the played rank, estimate the position(rank) of the time driven.
+    var newPosition = -1;
+    this.records.forEach((rec, idx) => {
+      if (rec.Best > time && newPosition === -1) {
+        newPosition = rec.Rank;
+      }
+    });
+    if (this.records.length === 0) {
+      newPosition = 1;
+    }
+
+    if (newPosition === -1 || newPosition > maxRank) {
+      this.plugin.log.debug('Drove time, would be rank ('+newPosition+'), but is higher then the maxrank ('+maxRank+')!');
+      return;
+    }
+    this.plugin.log.debug('Drove record rank: ' + newPosition + '. Adding to send queue.');
+
+    // Make new record.
+    /** @type {{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}} **/
+    let record = {
+      Login: login,
+      NickName: player.nickname,
+      Best: time,
+      Rank: newPosition,
+      MaxRank: maxRank,
+      Checks: run.join(','),
+      Vote: -1
+    };
+
+    /** @type {{Login: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}} **/
+    let changeRecord = {
+      Login: login,
+      Best: time,
+      Checks: run.join(',')
+    };
+
+    // First remove old record if still exists in this.records
+    let currentPosition = current ? current.Rank : -1;
+    console.log(current);
+    console.log(this.records.indexOf(current));
+
+    if (current) {
+      let idx = this.records.indexOf(current);
+      if (idx !== -1) delete this.records[idx];
+    }
+
+    // Add to local dedi list.
+    this.records.push(record);
+
+    // Sort.
+    this.records = this.records.sort((a, b) => a.Best - b.Best);
+    // Update rankings of each record.
+    this.records.forEach((rec, idx) => {
+      if (rec.Rank !== (idx+1)) rec.Rank = (idx+1);
+    });
+
+    // Add to queue
+    this.newRecords[login] = changeRecord;
+
+    // Update dedimania widget
+    this.plugin.widget.updateAll();
+
+    // Craft drove message.
+    var recordText = '';
+    if (type === 'equal') {
+      recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 equalled his/her $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) + '$0f3...';
+    }
+    if (type === 'improve') {
+      if (newPosition < currentPosition) {
+        recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 gained the $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) +
+          '$0f3 ($fff' + currentPosition + '$0f3. $fff' + this.plugin.app.util.times.stringTime(current.Best) + '$0f3/$fff-' + this.plugin.app.util.times.stringTime((current.Best - time)) + '$0f3)!';
+      }else{
+        recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 improved his/her $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) +
+          '$0f3 ($fff' + currentPosition + '$0f3. $fff' + this.plugin.app.util.times.stringTime(current.Best) + '$0f3/$fff-' + this.plugin.app.util.times.stringTime((current.Best - time)) + '$0f3)!';
+      }
+    }
+    if (type === 'new') {
+      recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 drove the $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) + '$0f3!';
+    }
+
+    // Send chat message.
+    if(newPosition <= this.displaylimit)
+      this.plugin.server.send().chat(recordText).exec();
+    else
+      this.plugin.server.send().chat(recordText, {destination: login}).exec();
   }
 };

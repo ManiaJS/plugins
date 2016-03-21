@@ -26,6 +26,7 @@
   },
   "main": "src/plugin.js",
   "dependencies": {
+    "async": "^1.5.2",
     "maniajs-plugin": "0.*",
     "maniajs-xmlrpc": "^2.0.0-alpha.3"
   }

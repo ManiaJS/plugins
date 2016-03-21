@@ -5,6 +5,8 @@
  */
 'use strict';
 
+var async = require('async');
+
 /**
  * Widget Logic.
  *
@@ -134,6 +136,18 @@ module.exports.default = class Widget {
   hideAll() {
     if (!this.widgetEnabled) return;
     this.recordsWidget.hide();
+  }
+
+  /**
+   * Update all recordwidgets.
+   */
+  updateAll() {
+    async.each(Object.keys(this.plugin.players.list), (login, callback) => {
+      let player = this.plugin.players.list[login];
+      if (player && ! player.disconnected) {
+        this.displayRecordsWidget(player);
+      }
+    })
   }
 
 
