@@ -134,7 +134,6 @@ module.exports.default = class Flow extends EventEmitter {
     if (time === 0) return;
 
     // Search for existing record.
-    // console.log(this.records);
     /** @var {[{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}]|{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}|boolean} currentRecord */
     var currentRecord = this.records.filter((rec) => rec.Login === player.login);
         currentRecord = currentRecord[0] || false;
@@ -143,7 +142,6 @@ module.exports.default = class Flow extends EventEmitter {
     let login = player.login;
     let run = this.runs[login] || false;
 
-    console.log(this.runs);
     if (! run) return; // Stop when no run is given!
 
     if (currentRecord) {
@@ -214,8 +212,9 @@ module.exports.default = class Flow extends EventEmitter {
         newPosition = rec.Rank;
       }
     });
-    if (this.records.length === 0) {
-      newPosition = 1;
+    if (newPosition === -1) {
+      // Last one :/
+      newPosition = this.records.length + 1;
     }
 
     if (newPosition === -1 || newPosition > maxRank) {
@@ -245,8 +244,6 @@ module.exports.default = class Flow extends EventEmitter {
 
     // First remove old record if still exists in this.records
     let currentPosition = current ? current.Rank : -1;
-    console.log(current);
-    console.log(this.records.indexOf(current));
 
     if (current) {
       let idx = this.records.indexOf(current);
@@ -326,6 +323,10 @@ module.exports.default = class Flow extends EventEmitter {
     return new Promise((resolve, reject) => {
       // Iterate through all new records.
       async.eachSeries(this.newRecords, (record, callback) => {
+        if (! record) {
+          return callback(); // Skip when record is invalid.
+        }
+
         // Index of current one.
         let idx = this.newRecords.indexOf(record);
 
@@ -334,10 +335,21 @@ module.exports.default = class Flow extends EventEmitter {
         var process;
 
         // Get position of record.
-        var rank = this.records.filter((r) => r.Login === record.Login && r.Best === record.Best);
-            rank = rank.length === 1 ? rank[0].Rank : 1;
+        var rank;
+        try {
+          rank = this.records.filter((r) => {
+            return r.Login && record.Login && r.Best && record.Best
+                && r.Login === record.Login && r.Best === record.Best;
+          });
+          rank = rank.length === 1 ? rank[0].Rank : 1;
+        } catch (err) {
+          this.plugin.log.warn(err);
+          this.plugin.log.debug(record);
+          this.plugin.log.debug(this.records);
+          return callback(); // Skip this record on failure.
+        }
 
-        if (rank === 1) {
+        if (rank === 1 && ! record.Top1GReplay) {
           // Yep. Lets get the Ghost!
           file = 'ManiaJS/Ghost.' + Date.now() + '_' + idx + '_' + record.Best + '.Replay.Gbx';
           process = this.plugin.server.send().custom('SaveBestGhostsReplay', [record.Login, file]).exec();
