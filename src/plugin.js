@@ -181,7 +181,7 @@ module.exports.default = class extends Plugin {
     this.dedimania.sendConnect(player);
 
     // Load records pane and text
-    this.playerRecord(player);
+    this.displayTextualRecord(player);
     this.widget.displayRecordsWidget(player);
   }
 

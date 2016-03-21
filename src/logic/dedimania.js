@@ -6,7 +6,7 @@
  */
 'use strict';
 
-var xmlrpc = require('xmlrpc');
+var xmlrpc = require('maniajs-xmlrpc');
 var EventEmitter = require('events').EventEmitter;
 
 /**
@@ -33,7 +33,7 @@ module.exports.default = class Dedimania extends EventEmitter {
     options = options || {};
 
     this.host = options.host || 'dedimania.net';
-    this.port = options.port || 8081;
+    this.port = options.port || 8082;
     this.debug = options.debug || false;
     this.path  = options.path || '/Dedimania';
 
@@ -56,8 +56,10 @@ module.exports.default = class Dedimania extends EventEmitter {
     this.client = xmlrpc.createClient({
       host: this.host,
       port: this.port,
-      path: this.path
-    }); // TODO: Add gzip support, fork xmlrpc module!
+      path: this.path,
+      gzip: true,
+      keepAlive: (10 * 60 * 1000)
+    });
   }
 
   /**
@@ -73,7 +75,7 @@ module.exports.default = class Dedimania extends EventEmitter {
 
   /**
    * Open Session to Dedimania.
-   * @returns {Promise<[]>}
+   * @returns {Promise<string>}
    */
   open () {
     if (! this.config.dedimaniacode || ! this.config.login) {
@@ -122,7 +124,7 @@ module.exports.default = class Dedimania extends EventEmitter {
    */
   _session() {
     if (! this.session) {
-      return this.openSession();
+      return this.open();
     }
     return Promise.resolve(this.session);
   }
@@ -250,7 +252,6 @@ module.exports.default = class Dedimania extends EventEmitter {
         });
 
         return resolve();
-        //this.client.methodCall('dedimania.PlayerConnect', [player.login, player.nickname, pla])
       });
     });
   }
