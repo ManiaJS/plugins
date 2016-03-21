@@ -18,6 +18,7 @@ var EventEmitter = require('events').EventEmitter;
  * @property {Plugin} plugin
  * @property {Dedimania} dedimania
  *
+ * @property {[string, {Login: string, Best: number, Checks: string}]} newRecords
  * @property {[{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}]} records
  *  -- '5061,11062,15448,21236,24947,33762,39443,40380,44731,48880' = checks.
  */
@@ -76,7 +77,10 @@ module.exports.default = class Flow extends EventEmitter {
    * Map End - Submitting recs to dedimania.
    */
   end () {
-
+    // Lock for new records (would be impossible, but to be sure to not alter after end map call).
+    this.active = false;
+    this.dedimania.sendRecords(this.newRecords);
+    // TODO: Promise then, clear newRecords.
   }
 
   /**
@@ -129,7 +133,7 @@ module.exports.default = class Flow extends EventEmitter {
     // Search for existing record.
     // console.log(this.records);
     /** @var {[{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}]|{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}|boolean} currentRecord */
-    var currentRecord = this.records.filter((rec) => rec.Login = player.login);
+    var currentRecord = this.records.filter((rec) => rec.Login === player.login);
         currentRecord = currentRecord[0] || false;
 
     var type;
@@ -199,7 +203,6 @@ module.exports.default = class Flow extends EventEmitter {
     } else {
       maxRank = playerRank;
     }
-    console.log(maxRank);
 
     // Check the played rank, estimate the position(rank) of the time driven.
     var newPosition = -1;
@@ -282,7 +285,7 @@ module.exports.default = class Flow extends EventEmitter {
     }
 
     // Send chat message.
-    if(newPosition <= this.displaylimit)
+    if(newPosition <= this.displayLimit)
       this.plugin.server.send().chat(recordText).exec();
     else
       this.plugin.server.send().chat(recordText, {destination: login}).exec();
