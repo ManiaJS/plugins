@@ -8,6 +8,8 @@
 
 var EventEmitter = require('events').EventEmitter;
 
+var async = require('async');
+
 /**
  * Flow
  * @class Flow
@@ -18,7 +20,7 @@ var EventEmitter = require('events').EventEmitter;
  * @property {Plugin} plugin
  * @property {Dedimania} dedimania
  *
- * @property {[string, {Login: string, Best: number, Checks: string}]} newRecords
+ * @property {[string, {Login: string, Best: number, Checks: string, VReplay: string, Top1GReplay: string}]} newRecords
  * @property {[{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}]} records
  *  -- '5061,11062,15448,21236,24947,33762,39443,40380,44731,48880' = checks.
  */
@@ -35,7 +37,7 @@ module.exports.default = class Flow extends EventEmitter {
     this.records =    []; // Holds fetched records and changed (the displaying state).
 
     // Newly driven records in this round.
-    this.newRecords = {}; // Indexed by login (because we have 1 update per player maximum).
+    this.newRecords = []; // Holds new driven records.
 
     // Holds checkpoint runs.
     this.runs       = {}; // Indexed by login.
@@ -45,7 +47,7 @@ module.exports.default = class Flow extends EventEmitter {
   }
 
   init () {
-    this.newRecords = {};
+    this.newRecords = [];
     this.runs       = {};
   }
 
@@ -260,34 +262,135 @@ module.exports.default = class Flow extends EventEmitter {
       if (rec.Rank !== (idx+1)) rec.Rank = (idx+1);
     });
 
+    // If player has something in queue, remove it.
+    let currentQueue = this.newRecords.filter((r) => r.Login === login);
+    if (currentQueue && currentQueue.length === 1) {
+      delete this.newRecords[this.newRecords.indexOf(currentQueue[0])];
+    }
+
     // Add to queue
-    this.newRecords[login] = changeRecord;
+    this.newRecords.push(changeRecord);
 
-    // Update dedimania widget
-    this.plugin.widget.updateAll();
+    // Sort Queue on best time
+    this.newRecords.sort((a,b) => a.Best - b.Best);
 
-    // Craft drove message.
-    var recordText = '';
-    if (type === 'equal') {
-      recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 equalled his/her $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) + '$0f3...';
-    }
-    if (type === 'improve') {
-      if (newPosition < currentPosition) {
-        recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 gained the $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) +
-          '$0f3 ($fff' + currentPosition + '$0f3. $fff' + this.plugin.app.util.times.stringTime(current.Best) + '$0f3/$fff-' + this.plugin.app.util.times.stringTime((current.Best - time)) + '$0f3)!';
-      }else{
-        recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 improved his/her $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) +
-          '$0f3 ($fff' + currentPosition + '$0f3. $fff' + this.plugin.app.util.times.stringTime(current.Best) + '$0f3/$fff-' + this.plugin.app.util.times.stringTime((current.Best - time)) + '$0f3)!';
+    // Update ghost and virtual replays in send queue.
+    this.updateRecordReplays().then(() => {
+      // Update dedimania widget
+      this.plugin.widget.updateAll();
+
+      // Craft drove message.
+      var recordText = '';
+      if (type === 'equal') {
+        recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 equalled his/her $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) + '$0f3...';
       }
-    }
-    if (type === 'new') {
-      recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 drove the $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) + '$0f3!';
-    }
+      if (type === 'improve') {
+        if (newPosition < currentPosition) {
+          recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 gained the $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) +
+            '$0f3 ($fff' + currentPosition + '$0f3. $fff' + this.plugin.app.util.times.stringTime(current.Best) + '$0f3/$fff-' + this.plugin.app.util.times.stringTime((current.Best - time)) + '$0f3)!';
+        }else{
+          recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 improved his/her $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) +
+            '$0f3 ($fff' + currentPosition + '$0f3. $fff' + this.plugin.app.util.times.stringTime(current.Best) + '$0f3/$fff-' + this.plugin.app.util.times.stringTime((current.Best - time)) + '$0f3)!';
+        }
+      }
+      if (type === 'new') {
+        recordText = '$0f3$<$fff' + player.nickname + '$>$0f3 drove the $fff' + newPosition + '$0f3. Dedimania Record, with a time of $fff' + this.plugin.app.util.times.stringTime(time) + '$0f3!';
+      }
 
-    // Send chat message.
-    if(newPosition <= this.displayLimit)
-      this.plugin.server.send().chat(recordText).exec();
-    else
-      this.plugin.server.send().chat(recordText, {destination: login}).exec();
+      // Send chat message.
+      if(newPosition <= this.displayLimit)
+        this.plugin.server.send().chat(recordText).exec();
+      else
+        this.plugin.server.send().chat(recordText, {destination: login}).exec();
+    }).catch((err) => {
+      // We will cancel the driven dedimania record!
+      delete this.newRecords[this.newRecords.indexOf(changeRecord)];
+      delete this.records[this.records.indexOf(record)];
+
+      // Resort and recalculate.
+      this.records = this.records.sort((a, b) => a.Best - b.Best);
+      this.newRecords.sort((a,b) => a.Best - b.Best);
+      this.records.forEach((rec, idx) => {
+        if (rec.Rank !== (idx+1)) rec.Rank = (idx+1);
+      });
+
+    });
+  }
+
+  /**
+   * Update records (new records) and give the top1 a ghost replay, and others VReplay if not already defined.
+   * @returns Promise<> promise, sends resolve on success, reject on failure. Reject is never good! It can resolve in dedimania loss!!
+   */
+  updateRecordReplays() {
+    return new Promise((resolve, reject) => {
+      // Iterate through all new records.
+      async.eachSeries(this.newRecords, (record, callback) => {
+        // Index of current one.
+        let idx = this.newRecords.indexOf(record);
+
+        // Check if top1 record
+        var file;
+        var process;
+
+        // Get position of record.
+        var rank = this.records.filter((r) => r.Login === record.Login && r.Best === record.Best);
+            rank = rank.length === 1 ? rank[0].Rank : 1;
+
+        if (rank === 1) {
+          // Yep. Lets get the Ghost!
+          // TODO: Get ghost (let the server save to disk) and read it from here!.
+
+          file = 'ManiaJS/Ghost.' + Date.now() + '_' + idx + '_' + record.Best + '.Replay.Gbx';
+          process = this.plugin.server.send().custom('SaveBestGhostsReplay', [record.Login, file]).exec();
+
+        } else {
+          console.log('NENEN ENEN EJ  AKUDASHJDASHJGDJA');
+          process = Promise.resolve(false);
+        }
+
+        process.then((ghostSaved) => {
+          console.log(ghostSaved);
+
+          if (ghostSaved) {
+            console.log('TODO: Parse GHOST file!!!');
+            // TODO: Read ghost file!!!!
+            return Promise.resolve('ghostcontent');
+          }
+          return Promise.resolve(false);
+        }).then((ghostContent) => {
+          if (ghostContent) {
+            // Top1GReplay is given, we just read it from filesystem!
+            // TODO: Parse and save top1 replay.
+            record.Top1GReplay = ''; // TODO
+          } else {
+            record.Top1GReplay = null;
+          }
+
+          if (! record.VReplay) {
+            // Get VReplay from server.
+            return this.plugin.server.send().custom('GetValidationReplay', [record.Login]).exec();
+          }
+          // Not needed.
+          return Promise.resolve(false);
+        }).then((validationReplay) => {
+          if (validationReplay) {
+            record.VReplay = validationReplay.toString('base64');
+          } else {
+            record.VReplay = null;
+          }
+
+          return callback();
+        }).catch((err) => {
+          this.plugin.log.error(err);
+          return callback(err);
+        });
+
+
+      }, (err) => {
+        // Should  be ready now...
+        if (err) return reject(err);
+        resolve();
+      });
+    });
   }
 };

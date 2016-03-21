@@ -220,6 +220,29 @@ module.exports.default = class Dedimania extends EventEmitter {
     })
   }
 
+  /**
+   * Send Records, Handle update of the records at the server.
+   * Only call it at the END of a map!
+   * 
+   * @param {[{Login: string, Best: number, Checks: string}]} updates
+   */
+  sendRecords (updates) {
+    // Prepare by defining send parameters.
+    /** @type {{UId:string,Name:string,Environment:string,Author:string,NbCheckpoints:number,NbLaps:number}} **/
+    var sendMap = {};
+    /** @type {string} **/
+    var sendGameMode = (this.app.server.currentMode() === 1 ? 'Rounds' : 'TA');
+    /** @type {[{Login:string,Best:number,Checks:string}]} **/
+    var sendTimes = [];
+    /** @type {{VReplay:string,VReplayChecks:string,Top1GReplay:string}} **/
+    var sendReplays = {};
+
+    // Parse and prepare records to send.
+    updates.forEach((rec) => {
+      console.error(rec);
+    });
+  }
+
 
   /**
    * Send Connect to dedimania. And fetch player info and data.
