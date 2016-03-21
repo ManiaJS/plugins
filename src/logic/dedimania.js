@@ -154,6 +154,7 @@ module.exports.default = class Dedimania extends EventEmitter {
             return reject(err);
           }
           if (! res) {
+            this.emit('fetched', []);
             return resolve(); // Mostly because mode is incorrect. So then we are skipping!
           }
 

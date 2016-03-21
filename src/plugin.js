@@ -128,9 +128,17 @@ module.exports.default = class extends Plugin {
       this.dedimania.on('fetched', (records) => {
         this.flow.setRecords(records);
 
-        // Dispaly Records
-        this.displayRecords();
-        this.displayPersonalRecords();
+        // Start flow (and check if map is allowed)
+        this.flow.mapCheck().then((allowed) => {
+          if (allowed) {
+            // Dispaly Records
+            this.displayRecords();
+            this.displayPersonalRecords();
+          } else {
+            // Remove widget
+            this.widget.hideAll();
+          }
+        });
       });
 
       return resolve();

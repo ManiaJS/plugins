@@ -128,6 +128,13 @@ module.exports.default = class Widget {
     this.recordsWidget.global(this.widgetSettings);
   }
 
+  /**
+   * Hide for all players.
+   */
+  hideAll() {
+    if (!this.widgetEnabled) return;
+    this.recordsWidget.hide();
+  }
 
 
   /**

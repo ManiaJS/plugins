@@ -13,6 +13,8 @@ var EventEmitter = require('events').EventEmitter;
  * @class Flow
  * @type {Flow}
  *
+ * @property {boolean} active
+ *
  * @property {Plugin} plugin
  * @property {Dedimania} dedimania
  *
@@ -22,6 +24,8 @@ var EventEmitter = require('events').EventEmitter;
 module.exports.default = class Flow extends EventEmitter {
   constructor (parent) {
     super();
+
+    this.active = false; // Active for current map.
 
     this.plugin = parent;
     this.dedimania = parent.dedimania;
@@ -70,6 +74,25 @@ module.exports.default = class Flow extends EventEmitter {
    */
   end () {
 
+  }
+
+  /**
+   * Check if map is allowed!
+   * @returns {Promise}
+   */
+  mapCheck () {
+    // Validate if map is valid for dedimania records!
+    return new Promise((resolve, reject) => {
+      this.plugin.server.send().custom('GetCurrentMapInfo').exec().then((map) => {
+        if (map.AuthorTime < 6200 || map.NbCheckpoints < 2) {
+          return resolve(false);
+        }
+        return   resolve(true);
+      }).catch(() => {
+        this.active = false;
+        resolve(false);
+      });
+    });
   }
 
   /**
