@@ -8,6 +8,7 @@
 
 var xmlrpc = require('maniajs-xmlrpc');
 var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
 /**
  * Dedimania Logic.
@@ -29,6 +30,7 @@ module.exports.default = class Dedimania extends EventEmitter {
   constructor (options) {
     super();
     this.app = {};
+    this.plugin = {};
 
     options = options || {};
 
@@ -225,8 +227,12 @@ module.exports.default = class Dedimania extends EventEmitter {
    * Only call it at the END of a map!
    * 
    * @param {[{Login: string, Best: number, Checks: string}]} updates
+   * @returns Promise<>
    */
   sendRecords (updates) {
+    // Don't do anything when there are no updates.
+    if (updates.length === 0) return Promise.resolve(true);
+
     // Prepare by defining send parameters.
     /** @type {{UId:string,Name:string,Environment:string,Author:string,NbCheckpoints:number,NbLaps:number}} **/
     var sendMap = {};
@@ -237,9 +243,44 @@ module.exports.default = class Dedimania extends EventEmitter {
     /** @type {{VReplay:string,VReplayChecks:string,Top1GReplay:string}} **/
     var sendReplays = {};
 
+    // Prepare mapinfo.
+    sendMap = this._map();
+
     // Parse and prepare records to send.
     updates.forEach((rec) => {
-      console.error(rec);
+      sendTimes.push({
+        Login: rec.Login,
+        Best: rec.Best,
+        Checks: rec.Checks
+      });
+    });
+
+    // Send Replays
+    var top1;
+    if (updates[0].Top1GReplay) {
+      top1 = new Base64(updates[0].Top1GReplay);
+    } else {
+      top1 = '';
+    }
+
+    sendReplays = {
+      VReplay: new Base64(updates[0].VReplay),
+      VReplayChecks: '',
+      Top1GReplay: top1
+    };
+
+    // Send to Dedimania.
+    return new Promise((resolve, reject) => {
+      this._session().then((sessionId) => {
+        this.client.methodCall('dedimania.SetChallengeTimes', [sessionId, sendMap, sendGameMode, sendTimes, sendReplays], (err, res) => {
+          if (err) {
+            this.plugin.log.error(err);
+            console.log(err.body);
+            return reject(err);
+          }
+          return resolve(true);
+        });
+      })
     });
   }
 
@@ -337,7 +378,7 @@ module.exports.default = class Dedimania extends EventEmitter {
       players.push({
         Login: player.login,
         IsSpec: player.info && player.info.isSpectator ? true : false,
-        Vote: -1 // TODO: Vote
+        Vote: -1
       });
     }
     return players;
@@ -383,3 +424,13 @@ module.exports.default = class Dedimania extends EventEmitter {
     };
   }
 };
+
+/**
+ * Base64 XMLRPC Type.
+ */
+class Base64 extends xmlrpc.CustomType {
+  constructor (raw) {
+    super (raw);
+    this.tagName = 'base64';
+  }
+}

@@ -85,6 +85,7 @@ module.exports.default = class extends Plugin {
       // Set the dedimania stuff.
       this.dedimania.config = this.config;
       this.dedimania.app = this.app;
+      this.dedimania.plugin = this;
       // UI
       this.widget.init(this.app.ui.build(this, 'recordswidget', 1));
       // Flow

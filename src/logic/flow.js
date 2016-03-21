@@ -114,8 +114,13 @@ module.exports.default = class Flow extends EventEmitter {
    * @param {number} time
    */
   checkpoint (player, time) {
+    let maxCheckpoints = this.dedimania.game.map.NbCheckpoints;
+
     if (! this.runs.hasOwnProperty(player.login)) {
       this.runs[player.login] = [];
+    }
+    if ((this.runs[player.login].length + 1) === maxCheckpoints) {
+      //return;
     }
     if (time === 0) {
       this.runs[player.login] = [time];
@@ -131,7 +136,9 @@ module.exports.default = class Flow extends EventEmitter {
    * @param {number} time
    */
   finish (player, time) {
-    if (time === 0) return;
+    if (time === 0) {
+      this.runs[player.login] = []; // Reset runs.
+    }
 
     // Search for existing record.
     /** @var {[{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}]|{Login: string, NickName: string, Best: number, Rank: number, MaxRank: number, Checks: string, Vote: number}|boolean} currentRecord */
@@ -371,7 +378,7 @@ module.exports.default = class Flow extends EventEmitter {
         }).then((ghostContent) => {
           if (ghostContent) {
             // Top1GReplay is given, we just read it from filesystem!
-            record.Top1GReplay = ghostContent.toString('base64'); // From Buffer instance.
+            record.Top1GReplay = (new Buffer(ghostContent, 'binary')).toString('base64'); // From Buffer instance.
           } else {
             record.Top1GReplay = null;
           }
