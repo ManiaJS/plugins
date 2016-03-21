@@ -9,6 +9,7 @@
 var EventEmitter = require('events').EventEmitter;
 
 var async = require('async');
+var fs = require('fs');
 
 /**
  * Flow
@@ -338,30 +339,27 @@ module.exports.default = class Flow extends EventEmitter {
 
         if (rank === 1) {
           // Yep. Lets get the Ghost!
-          // TODO: Get ghost (let the server save to disk) and read it from here!.
-
           file = 'ManiaJS/Ghost.' + Date.now() + '_' + idx + '_' + record.Best + '.Replay.Gbx';
           process = this.plugin.server.send().custom('SaveBestGhostsReplay', [record.Login, file]).exec();
-
         } else {
-          console.log('NENEN ENEN EJ  AKUDASHJDASHJGDJA');
           process = Promise.resolve(false);
         }
 
+        // Run the promise given.
         process.then((ghostSaved) => {
-          console.log(ghostSaved);
-
           if (ghostSaved) {
-            console.log('TODO: Parse GHOST file!!!');
-            // TODO: Read ghost file!!!!
-            return Promise.resolve('ghostcontent');
+            return new Promise((resolve, reject) => {
+              fs.readFile(this.plugin.server.paths.data + '/Replays/' + file, (err, buffer) => {
+                if (err) return reject(err);
+                return resolve(buffer);
+              });
+            });
           }
           return Promise.resolve(false);
         }).then((ghostContent) => {
           if (ghostContent) {
             // Top1GReplay is given, we just read it from filesystem!
-            // TODO: Parse and save top1 replay.
-            record.Top1GReplay = ''; // TODO
+            record.Top1GReplay = ghostContent.toString('base64'); // From Buffer instance.
           } else {
             record.Top1GReplay = null;
           }
