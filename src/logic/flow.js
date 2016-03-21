@@ -85,8 +85,10 @@ module.exports.default = class Flow extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.plugin.server.send().custom('GetCurrentMapInfo').exec().then((map) => {
         if (map.AuthorTime < 6200 || map.NbCheckpoints < 2) {
+          this.active = false;
           return resolve(false);
         }
+        this.active = true;
         return   resolve(true);
       }).catch(() => {
         this.active = false;
