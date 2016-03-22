@@ -126,16 +126,6 @@ module.exports.default = class extends Plugin {
         this.displayKarmaWidget(player);
       });
 
-      this.server.command.on('skip', 1, (player, params) => {
-        this.server.send().chat("$fffSkipping map...").exec();
-        this.server.send().custom('NextMap').exec();
-      });
-
-      this.server.command.on('restart', 1, (player, params) => {
-        this.server.send().chat("$fffRestarting map...").exec();
-        this.server.send().custom('RestartMap').exec();
-      });
-
       this.server.command.on('whokarma', 'List of Karma Votes', (player) => this.displayList(player));
 
       // UI
