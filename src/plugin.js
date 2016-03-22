@@ -21,6 +21,9 @@ module.exports.default = class extends Plugin {
     // Add dependencies, enter module full id's (mostly npm package names) here.
     this.dependencies = [];
 
+    // Could be 'playing', 'podium' and 'inactive'.
+    this.state = 'playing';
+
     // Plugin properties
     this.votes = null;
     this.plusVotes = 0;
@@ -102,7 +105,11 @@ module.exports.default = class extends Plugin {
       icon_style: 'Icons128x128_1',
       icon_substyle: 'Challenge',
 
-      text_color: 'FFFF'
+      text_color: 'FFFF',
+
+      mapname: '',
+      author: '',
+      author_time: ''
     };
   }
 
@@ -116,43 +123,50 @@ module.exports.default = class extends Plugin {
     return new Promise((resolve, reject) => {
       // Event
       this.server.on('map.begin', (params) => {
-        Object.keys(this.players.list).forEach((login) => {
-          let player = this.players.list[login];
-          this.displayMapWidget(player);
-        });
+        this.state = 'playing';
+        this.displayMapWidgetToAllPlayers();
+      });
+
+      // Will be when the podium is visible!
+      this.server.on('match.end', (params) => {
+        this.state = 'podium';
+        this.displayMapWidgetToAllPlayers();
       });
 
       this.server.on('player.connect', (params) => {
-        let player = this.players.list[params.login];
-        this.displayMapWidget(player);
+        this.mapWidget.player (params.login, {});
+        this.mapWidget.update();
       });
 
       // UI
       this.mapWidget = this.app.ui.build(this, 'mapwidget', 1);
       this.mapWidget.global(this.widgetSettings);
-
-      Object.keys(this.players.list).forEach((login) => {
-        let player = this.players.list[login];
-        this.displayMapWidget(player);
-      });
+      this.displayMapWidgetToAllPlayers();
 
       resolve();
     });
   }
 
   /**
-   * Displays the karma widget to the player.
-   *
-   * @param player
+   * Displays the karma widget to all players.
    */
-  displayMapWidget(player) {
-    this.app.log.debug('Name: ' + this.maps.current.name + ', author: ' + this.maps.current.author + ', author time: ' + this.maps.current.author_time);
-    
-    var widgetOptions = {
-      mapname: this.maps.current.name,
-      author: this.maps.current.author,
-      author_time: this.maps.current.author_time
-    };
-    this.mapWidget.player(player.login, widgetOptions).update();
+  displayMapWidgetToAllPlayers() {
+    var mapPromise;
+
+    if (this.state === 'playing') {
+      this.widgetSettings.title = 'Current Map';
+      mapPromise = this.server.send().custom('GetCurrentMapInfo').exec();
+    } else if (this.state === 'podium') {
+      this.widgetSettings.title = 'Next Map';
+      mapPromise = this.server.send().custom('GetNextMapInfo').exec();
+    } else {
+      return;
+    }
+    mapPromise.then((map) => {
+      this.widgetSettings.mapname = map.Name;
+      this.widgetSettings.author = map.Author;
+      this.widgetSettings.author_time = this.app.util.times.stringTime(map.AuthorTime);
+      this.mapWidget.global(this.widgetSettings).update();
+    });
   }
 };
