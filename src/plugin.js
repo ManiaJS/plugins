@@ -251,11 +251,11 @@ module.exports.default = class extends Plugin {
    */
   displayVotes(player) {
     var plusPercentage = parseFloat(((this.plusVotes/this.votes.length) * 100)).toFixed(1);
-    if(Number.isNaN(plusPercentage))
+    if(isNaN(plusPercentage))
       plusPercentage = 0;
 
     var minPercentage = parseFloat(((this.minVotes/this.votes.length) * 100)).toFixed(1);
-    if(Number.isNaN(minPercentage))
+    if(isNaN(minPercentage))
       minPercentage = 0;
 
     var chatKarma = '$ff0Current map karma: $fff' + (this.plusVotes - this.minVotes);
@@ -316,7 +316,7 @@ module.exports.default = class extends Plugin {
     karma += currentKarma;
 
     var karmaPercentage = parseFloat(((this.plusVotes/this.votes.length) * 100)).toFixed(1);
-    if(Number.isNaN(karmaPercentage))
+    if(isNaN(karmaPercentage))
       karmaPercentage = 0;
 
     var widgetOptions = {
