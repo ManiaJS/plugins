@@ -9,6 +9,8 @@
 var xmlrpc = require('maniajs-xmlrpc');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var os = require('os');
+var Package = require('./../../package');
 
 /**
  * Dedimania Logic.
@@ -60,7 +62,12 @@ module.exports.default = class Dedimania extends EventEmitter {
       port: this.port,
       path: this.path,
       gzip: true,
-      keepAlive: (10 * 60 * 1000)
+      keepAlive: (10 * 60 * 1000),
+      userAgent: 'maniajs-dedimania/' +  Package.version + ' (' + os.platform() + '; '
+                      + os.platform() + ' ' + os.release() + '; '
+                      + os.arch() + '; '
+                      + 'node ' + process.version
+                + ')'
     });
   }
 
@@ -241,7 +248,11 @@ module.exports.default = class Dedimania extends EventEmitter {
     /** @type {[{Login:string,Best:number,Checks:string}]} **/
     var sendTimes = [];
     /** @type {{VReplay:string,VReplayChecks:string,Top1GReplay:string}} **/
-    var sendReplays = {};
+    var sendReplays = {
+      VReplay: '',
+      VReplayChecks: '',
+      Top1GReplay: ''
+    };
 
     // Prepare mapinfo.
     sendMap = this._map();
@@ -256,18 +267,11 @@ module.exports.default = class Dedimania extends EventEmitter {
     });
 
     // Send Replays
-    var top1;
     if (updates[0].Top1GReplay) {
-      top1 = new Base64(updates[0].Top1GReplay);
-    } else {
-      top1 = '';
+      sendReplays.Top1GReplay = new Base64(updates[0].Top1GReplay);
     }
-
-    sendReplays = {
-      VReplay: new Base64(updates[0].VReplay),
-      VReplayChecks: '',
-      Top1GReplay: top1
-    };
+    sendReplays.VReplay = new Base64(updates[0].VReplay);
+    sendReplays.VReplayChecks = '';
 
     // Send to Dedimania.
     return new Promise((resolve, reject) => {
@@ -275,9 +279,9 @@ module.exports.default = class Dedimania extends EventEmitter {
         this.client.methodCall('dedimania.SetChallengeTimes', [sessionId, sendMap, sendGameMode, sendTimes, sendReplays], (err, res) => {
           if (err) {
             this.plugin.log.error(err);
-            console.log(err.body);
             return reject(err);
           }
+          this.plugin.log.debug('Dedimania times successfully send!');
           return resolve(true);
         });
       })

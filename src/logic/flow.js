@@ -386,8 +386,8 @@ module.exports.default = class Flow extends EventEmitter {
           if (! record.VReplay) {
             // Get VReplay from server.
             return this.plugin.server.send().custom('GetValidationReplay', [record.Login]).exec();
+            //return this.plugin.server.send().custom('system.multicall', [[{methodName: 'GetValidationReplay', params: [record.Login]}]]).exec();
           }
-          // Not needed.
           return Promise.resolve(false);
         }).then((validationReplay) => {
           if (validationReplay) {
