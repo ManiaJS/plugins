@@ -11,7 +11,7 @@
     "cli"
   ],
   "bin": {
-    "maniajs": "./bin/maniajs"
+    "maniajs": "./bin/maniajs.js"
   },
   "bugs": {
     "url": "https://github.com/ManiaJS/maniajs-cli/issues"

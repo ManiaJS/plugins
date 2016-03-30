@@ -1,4 +1,5 @@
 /**
  * ManiaJS Cli Tool.
  */
-console.log('Not yet implemented');
+'use strict';
+require('./cli');
