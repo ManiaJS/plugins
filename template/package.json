@@ -1,0 +1,16 @@
+{
+  "name": "maniajs-server",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node maniajs.js"
+  },
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
