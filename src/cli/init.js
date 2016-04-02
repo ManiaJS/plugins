@@ -7,14 +7,20 @@ import colors from 'colors/safe';
 import stringFormat from 'string-template';
 import * as inquirer from 'inquirer';
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
+import semverRegex from 'semver-regex';
 
+import Installation from './../installation';
+import {plugins as defaultPlugins} from './../../template/default-plugins';
+
+// Start CLI tool (commanderjs).
 program
   .option('--install-version <version>', 'install custom ManiaJS version.')
   .parse(process.argv);
 
 let versionToInstall = program.installVersion || null;
 let folder = path.resolve(program.args.length ? program.args[0] : __dirname + '/');
+let templateFolder = path.resolve(__dirname + '/../../template/');
 
 // Check folder (if not exists, also okay, will create).
 if (fs.existsSync(folder) && fs.readdirSync(folder).filter((f) => ! /^\..*/.test(f)).length !== 0) {
@@ -189,10 +195,76 @@ inquirer.prompt(questions, (answers) => {
   answers.dbPass = answers.dbPass || '';
 
   status('Writing configuration file...');
-  let configTemplate = fs.readFileSync(__dirname + '/../../template/config-' + (answers.plugins ? 'plugins' : 'noplugins') + '.yaml', 'utf8');
+  let configTemplate = fs.readFileSync(templateFolder + '/config-' + (answers.plugins ? 'plugins' : 'noplugins') + '.yaml', 'utf8');
   let config = stringFormat(configTemplate, answers);
   fs.writeFileSync(folder + '/' + 'config.yaml', config, 'utf8');
   console.log();
 
 
+  status('Installing ManiaJS...');
+  fs.copySync(templateFolder + '/maniajs.js', folder + '/maniajs.js');
+  fs.copySync(templateFolder + '/package.json', folder + '/package.json');
+
+
+  function mjsFormatter(v) {
+    let original = semverRegex().exec(v)[0];
+    let p = original.split('.');
+    if (p.length === 3) {
+      p[1] = 'x';
+      p[2] = 'x';
+    }
+    let nw = p.join('.');
+    return v.replace(original, nw);
+  }
+
+  function pluginFormatter(v) {
+    let original = semverRegex().exec(v)[0];
+    let p = original.split('.');
+    if (p.length === 3) {
+      p[2] = 'x';
+    } else if (p.length === 2) {
+      p[1] = 'x';
+    }
+    let nw = p.join('.');
+    return v.replace(original, nw);
+  }
+
+  let pkg = JSON.parse(fs.readFileSync(folder + '/package.json', 'utf8'));
+  let installation = new Installation(folder);
+  installation.load().then(() => {
+
+    return installation.install([
+      {
+        name: 'maniajs', version: versionToInstall || 'latest', formatter: function (v) {
+        return mjsFormatter(v);
+      }
+      }]);
+  }).then((data) => {
+
+    status('Installing plugins...');
+
+    if (answers.plugins) {
+      var install = [];
+      Object.keys(defaultPlugins).forEach((pluginName) => {
+        let version = defaultPlugins[pluginName];
+        install.push({
+          name: pluginName, version: version, formatter: function (v) {
+            return pluginFormatter(v);
+          }
+        });
+      });
+      return installation.install(install);
+    } else {
+      return Promise.resolve(false);
+    }
+  }).then((plgs) => {
+    status('Init completed!');
+    process.exit(0);
+
+  }).catch((err) => {
+    console.log(colors.red('Error: Error with executing npm tasks. Details:'));
+    console.log(err);
+    console.log(err.stack);
+    process.exit(1);
+  });
 });
