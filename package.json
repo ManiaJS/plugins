@@ -1,8 +1,25 @@
 {
   "name": "maniajs-mapwidget",
   "version": "0.0.0",
-  "private": false,
   "main": "src/plugin.js",
+  "description": "ManiaJS Plugin - Map Widget Plugin",
+  "keywords": [
+    "maniajs",
+    "maniaplanet",
+    "trackmania",
+    "shootmania",
+    "plugin",
+    "mapinfo",
+    "mapwidget"
+  ],
+  "bugs": {
+    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+  },
+  "license": "ISC",
+  "repository": "ManiaJS/maniajs-mapwidget",
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "dependencies": {
     "maniajs-plugin": "0.*"
   }
