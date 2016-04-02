@@ -1,8 +1,24 @@
 {
   "name": "maniajs-karma",
   "version": "0.0.0",
-  "private": false,
   "main": "src/plugin.js",
+  "description": "ManiaJS Plugin - Map Karma + Widget Plugin",
+  "keywords": [
+    "maniajs",
+    "maniaplanet",
+    "trackmania",
+    "shootmania",
+    "plugin",
+    "karma"
+  ],
+  "bugs": {
+    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+  },
+  "license": "ISC",
+  "repository": "ManiaJS/maniajs-karma",
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "dependencies": {
     "maniajs-plugin": "0.*"
   }
