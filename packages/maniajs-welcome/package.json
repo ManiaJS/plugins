@@ -1,5 +1,5 @@
 {
-  "name": "maniajs-welcome",
+  "name": "@maniajs/plugin-welcome",
   "version": "0.0.0",
   "private": false,
   "description": "ManiaJS Plugin - Welcome Plugin, will welcome your players on the server.",

@@ -5,7 +5,7 @@ var path    = require('path');
 
 var async   = require('async');
 
-var Plugin  = require('maniajs-plugin').default;
+var Plugin  = require('@maniajs/plugin').default;
 
 /**
  * LocalRecords Plugin.

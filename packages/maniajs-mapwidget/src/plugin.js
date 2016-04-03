@@ -3,7 +3,7 @@
 var Package = require('./../package.json');
 var path = require('path');
 
-var Plugin = require('maniajs-plugin').default;
+var Plugin = require('@maniajs/plugin').default;
 
 /**
  * MapWidget Plugin.

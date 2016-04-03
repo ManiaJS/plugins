@@ -2,7 +2,7 @@
 
 var Package = require('./../package.json');
 
-var Plugin  = require('maniajs-plugin').default;
+var Plugin  = require('@maniajs/plugin').default;
 
 var PlayerCommands    = require('./player').default;
 var MapCommands       = require('./map').default;

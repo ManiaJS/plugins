@@ -42,21 +42,29 @@ config:
       host: '{dbHost}'
       port: {dbPort}
 
+    mssql:
+      host: '{dbHost}'
+      port: {dbPort}
+
+    postgres:
+      host: '{dbHost}'
+      port: {dbPort}
+
     sqlite:
       storage: '{dbStorage}'
 
 plugins:
-  maniajs-jukebox:
-  maniajs-mapwidget:
-  maniajs-karma:
-  maniajs-help:
-  maniajs-welcome:
-  maniajs-admin:
+  '@maniajs/plugin-jukebox':
+  '@maniajs/plugin-mapwidget':
+  '@maniajs/plugin-karma':
+  '@maniajs/plugin-help':
+  '@maniajs/plugin-welcome':
+  '@maniajs/plugin-admin':
 
-  maniajs-localrecords:
+  '@maniajs/plugin-localrecords':
     recordlimit: 100
     displaylimit: 50
-  maniajs-dedimania:
+  '@maniajs/plugin-dedimania':
       login: change
       dedimaniacode: change
       displaylimit: 50

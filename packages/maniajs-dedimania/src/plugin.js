@@ -4,7 +4,7 @@ var Package = require('./../package.json');
 var path    = require('path');
 var xmlrpc  = require('xmlrpc');
 
-var Plugin  = require('maniajs-plugin').default;
+var Plugin  = require('@maniajs/plugin').default;
 
 var Dedimania = require('./logic/dedimania').default;
 var Widget    = require('./logic/widget').default;

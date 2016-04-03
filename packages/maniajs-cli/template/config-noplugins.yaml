@@ -42,6 +42,14 @@ config:
       host: '{dbHost}'
       port: {dbPort}
 
+    mssql:
+      host: '{dbHost}'
+      port: {dbPort}
+
+    postgres:
+      host: '{dbHost}'
+      port: {dbPort}
+
     sqlite:
       storage: '{dbStorage}'
 

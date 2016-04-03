@@ -219,6 +219,6 @@ module.exports.default = class {
    * @private
    */
   _removefake (player, params) {
-    this.plugin.server.send().custom('DisconnectFakePlayer').exec();
+    this.plugin.server.send().custom('DisconnectFakePlayer',['*']).exec();
   }
 };
