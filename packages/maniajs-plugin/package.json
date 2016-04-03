@@ -1,0 +1,26 @@
+{
+  "name": "maniajs-plugin",
+  "version": "0.4.1",
+  "private": false,
+  "main": "src/plugin.js",
+  "description": "Plugin Interface for ManiaJS Plugin Structure",
+  "keywords": [
+    "maniajs",
+    "plugin",
+    "interface"
+  ],
+  "bugs": {
+    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+  },
+  "license": "ISC",
+  "repository": "ManiaJS/maniajs-plugin",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "contributors": [
+    {
+      "name": "Tom Valk",
+      "email": "tomvalk@lt-box.info"
+    }
+  ]
+}
