@@ -1,0 +1,22 @@
+### General
+.DS_Store
+Thumbs.db
+
+### Node
+logs
+*.log
+npm-debug.log
+pids
+*.pid
+*.seed
+
+node_modules
+
+### Packages
+/packages/*/lib
+
+### IDE
+*.iml
+*.ipr
+*.iws
+.idea/
