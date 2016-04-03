@@ -35,13 +35,13 @@ config.yaml
 database.sqlite
 
 # logs
-/log/*
+log/*
 !/log/.gitkeep
 
 
 
 ### Develop
-/plugins
+plugins
 
 ### Babel Output
-/lib/
+lib/
