@@ -188,4 +188,37 @@ module.exports.default = class {
 
     // TODO: Kick by ID from list.
   }
+
+
+  /**
+   * Connect Fake Player(s).
+   *
+   * @param player
+   * @param params
+   * @returns {*|Array|{index: number, input: string}}
+   * @private
+   */
+  _addfake (player, params) {
+    if (params.length === 0) {
+      return this.plugin.server.send().chat('$F66Syntax Error:$z $fff$n/admin addfake [number of fakes]$z', {destination: player.login}).exec();
+    }
+
+    let number = parseInt(params[0]);
+
+    // Connect players (* number).
+    for (var i = 0; i < number; i++) {
+      this.plugin.server.send().custom('ConnectFakePlayer').exec();
+    }
+  }
+
+  /**
+   * Disconnect all fake players.
+   *
+   * @param player
+   * @param params
+   * @private
+   */
+  _removefake (player, params) {
+    this.plugin.server.send().custom('DisconnectFakePlayer').exec();
+  }
 };
