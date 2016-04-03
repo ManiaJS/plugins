@@ -1,4 +1,11 @@
 {
   "private": true,
-  "license": "ISC"
+  "license": "ISC",
+  "scripts": {
+    "update-all": "node ./scripts/npm-update-all.js"
+  },
+  "dependencies": {
+    "async": "^2.0.0-rc.2",
+    "colors": "^1.1.2"
+  }
 }
