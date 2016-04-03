@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 # ManiaJS Official Plugins
 
@@ -24,3 +25,7 @@ The local records plugin is configurable in `config.yaml`:
 | widgetx        | Integer      | 0 - ...    | X-position of the widget (default: 49.2)                            |
 | widgety        | Integer      | 0 - ...    | Y-position of the widget (default: 28.2)                            |
 >>>>>>> old_maniajs-localrecords/master
+=======
+# maniajs-mapwidget
+MapWidget plugin for ManiaJS.
+>>>>>>> old_maniajs-mapwidget/master
