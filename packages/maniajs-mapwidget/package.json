@@ -1,5 +1,5 @@
 {
-  "name": "maniajs-mapwidget",
+  "name": "@maniajs/plugin-mapwidget",
   "version": "0.0.0",
   "main": "src/plugin.js",
   "description": "ManiaJS Plugin - Map Widget Plugin",
@@ -13,14 +13,14 @@
     "mapwidget"
   ],
   "bugs": {
-    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-mapwidget",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-mapwidget",
   "engines": {
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "maniajs-plugin": "0.*"
+    "@maniajs/plugin": "0.*"
   }
 }

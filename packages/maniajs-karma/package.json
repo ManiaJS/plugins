@@ -1,5 +1,5 @@
 {
-  "name": "maniajs-karma",
+  "name": "@maniajs/plugin-karma",
   "version": "0.0.0",
   "main": "src/plugin.js",
   "description": "ManiaJS Plugin - Map Karma + Widget Plugin",
@@ -12,14 +12,14 @@
     "karma"
   ],
   "bugs": {
-    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-karma",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-karma",
   "engines": {
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "maniajs-plugin": "0.*"
+    "@maniajs/plugin": "0.*"
   }
 }

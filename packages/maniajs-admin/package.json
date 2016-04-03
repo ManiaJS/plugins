@@ -1,28 +1,24 @@
 {
-  "name": "maniajs-admin",
+  "name": "@maniajs/plugin-admin",
   "version": "0.0.0",
-  "private": false,
-
   "description": "ManiaJS Plugin - Admin Administration Plugin",
   "keywords": ["maniajs", "maniaplanet", "trackmania", "shootmania", "admin", "plugin"],
   "bugs": {
-    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-
   "contributors": [
     {
       "name": "Tom Valk",
       "email": "tomvalk@lt-box.info"
     }
   ],
-  "repository": "ManiaJS/maniajs-admin",
-  "engines": {git
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-admin",
+  "engines": {
     "node": ">=4.0.0"
   },
-
   "main": "src/plugin.js",
   "dependencies": {
-    "maniajs-plugin": "0.*"
+    "@maniajs/plugin": "0.*"
   }
 }

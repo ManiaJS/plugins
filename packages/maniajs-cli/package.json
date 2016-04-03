@@ -1,6 +1,6 @@
 {
-  "name": "maniajs-cli",
-  "version": "0.0.1",
+  "name": "@maniajs/cli",
+  "version": "0.0.0",
   "description": "ManiaPlanet Server Controller CLI Tool.",
   "keywords": [
     "maniajs",
@@ -14,10 +14,10 @@
     "maniajs": "./bin/maniajs.js"
   },
   "bugs": {
-    "url": "https://github.com/ManiaJS/maniajs-cli/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-cil",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-cli",
   "engines": {
     "node": ">=4.0.0"
   },

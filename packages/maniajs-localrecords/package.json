@@ -1,5 +1,5 @@
 {
-  "name": "maniajs-localrecords",
+  "name": "@maniajs/plugin-localrecords",
   "version": "0.0.0",
   "main": "src/plugin.js",
   "description": "ManiaJS Plugin - LocalRecords Plugin",
@@ -11,15 +11,15 @@
     "localrecords"
   ],
   "bugs": {
-    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-localrecords",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-localrecords",
   "engines": {
     "node": ">=4.0.0"
   },
   "dependencies": {
     "async": "^1.5.2",
-    "maniajs-plugin": "0.*"
+    "@maniajs/plugin": "0.*"
   }
 }

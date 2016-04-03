@@ -1,5 +1,5 @@
 {
-  "name": "maniajs-jukebox",
+  "name": "@maniajs/plugin-jukebox",
   "version": "0.0.0",
   "private": false,
   "main": "src/plugin.js",
@@ -12,15 +12,15 @@
     "jukebox"
   ],
   "bugs": {
-    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-jukebox",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-jukebox",
   "engines": {
     "node": ">=4.0.0"
   },
   "dependencies": {
     "async": "^1.5.2",
-    "maniajs-plugin": "0.*"
+    "@maniajs/plugin": "0.*"
   }
 }

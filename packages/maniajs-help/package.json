@@ -1,6 +1,6 @@
 {
-  "name": "maniajs-help",
-  "version": "0.3.0",
+  "name": "@maniajs/plugin-help",
+  "version": "0.0.0",
   "private": false,
   "description": "ManiaJS Plugin - Help Plugin, ManiaJS and Command Help.",
   "keywords": [
@@ -12,12 +12,12 @@
     "help"
   ],
   "bugs": {
-    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-help",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-help",
   "main": "src/plugin.js",
   "dependencies": {
-    "maniajs-plugin": "0.*"
+    "@maniajs/plugin": "0.*"
   }
 }

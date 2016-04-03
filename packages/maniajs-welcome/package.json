@@ -1,6 +1,6 @@
 {
   "name": "maniajs-welcome",
-  "version": "0.1.1",
+  "version": "0.0.0",
   "private": false,
   "description": "ManiaJS Plugin - Welcome Plugin, will welcome your players on the server.",
   "keywords": [
@@ -12,12 +12,12 @@
     "welcome"
   ],
   "bugs": {
-    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-welcome",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-welcome",
   "main": "src/plugin.js",
   "dependencies": {
-    "maniajs-plugin": "0.*"
+    "@maniajs/plugin": "0.*"
   }
 }

@@ -1,6 +1,6 @@
 {
-  "name": "maniajs-plugin",
-  "version": "0.4.1",
+  "name": "@maniajs/plugin",
+  "version": "0.0.0",
   "private": false,
   "main": "src/plugin.js",
   "description": "Plugin Interface for ManiaJS Plugin Structure",
@@ -10,10 +10,10 @@
     "interface"
   ],
   "bugs": {
-    "url": "https://github.com/ManiaJS/ManiaJS/issues"
+    "url": "https://github.com/ManiaJS/plugins/issues"
   },
   "license": "ISC",
-  "repository": "ManiaJS/maniajs-plugin",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-plugin",
   "engines": {
     "node": ">=4.0.0"
   },
