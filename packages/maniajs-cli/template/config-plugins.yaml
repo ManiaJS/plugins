@@ -1,0 +1,62 @@
+# Configuration for ManiaJS and Plugins.
+# DO NOT CHANGE WHEN THE CONTROLLER IS RUNNING! CLOSE CONTROLLER AND REFRESH THE FILE!
+
+config:
+  debug: false
+
+  server:
+    game: '{game}' # Could be 'trackmania' or 'shootmania'
+    address: '{serverHost}'
+    port: {serverPort}
+    authentication:
+      username: {serverUser}
+      password: {serverPassword}
+
+  masteradmins:
+  - {masterAdmin}
+
+  db:
+    dialect: '{dbType}' # Can be mysql, mariadb or sqlite.
+    # ! ==> SQLite3 Requires compilation, this means that you have to get build-essentials on linux, Visual Studio on Windows or XCode on Mac OS X.
+    # When not having build tools, you will get warnings when starting for the first time or run the installation script.
+    # You can ignore this, but can't use the dialects then!
+    # To recompile run 'npm install sqlite3' in root
+
+    # Global Non-driver-dependent settings:
+    debug: false
+    database: '{dbName}'
+    authentication:
+      username: '{dbUser}'
+      password: '{dbPass}'
+    pool:
+      max: 5
+      min: 0
+      idle: 10000
+
+    # Driver settings
+    mysql:
+      host: '{dbHost}'
+      port: {dbPort}
+
+    mariadb:
+      host: '{dbHost}'
+      port: {dbPort}
+
+    sqlite:
+      storage: '{dbStorage}'
+
+plugins:
+  maniajs-jukebox:
+  maniajs-mapwidget:
+  maniajs-karma:
+  maniajs-help:
+  maniajs-welcome:
+  maniajs-admin:
+
+  maniajs-localrecords:
+    recordlimit: 100
+    displaylimit: 50
+  maniajs-dedimania:
+      login: change
+      dedimaniacode: change
+      displaylimit: 50
