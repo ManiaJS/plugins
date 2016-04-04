@@ -6,7 +6,7 @@
  */
 'use strict';
 
-var xmlrpc = require('maniajs-xmlrpc');
+var xmlrpc = require('@maniajs/xmlrpc');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var os = require('os');
@@ -232,7 +232,7 @@ module.exports.default = class Dedimania extends EventEmitter {
   /**
    * Send Records, Handle update of the records at the server.
    * Only call it at the END of a map!
-   * 
+   *
    * @param {[{Login: string, Best: number, Checks: string}]} updates
    * @returns Promise<>
    */
