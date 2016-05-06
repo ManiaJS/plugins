@@ -10,12 +10,26 @@ module.exports.default = class Jukebox {
     this.jukebox = [];
   }
 
+  endmap (params) {
+    if (! this.jukebox.length)
+      return;
+
+    let map = this.jukebox.shift();
+
+    this.plugin.server.send().custom('SetNextMapIdent', [map.uid]).exec().then(() => {
+      this.plugin.server.send().chat(`$c70Next map will be $c70$<$fff${map.name}$>$c70 as jukeboxed by $c70$<$fff${map.jukeAuthor}$>$c70.`).exec();
+    }).catch((err) => {
+      console.error(err, err.stack);
+    });
+  }
+
   /**
    * Add a map to the jukebox. PushTop can be true to have it at the top.
    * @param {Map|string} mapEntry Map object (db) or UID string.
+   * @param {Player} player Player object.
    * @param {boolean} [pushTop]
    */
-  add (mapEntry, pushTop) {
+  add (mapEntry, player, pushTop) {
     pushTop = pushTop || false;
 
     var promise;
@@ -34,6 +48,7 @@ module.exports.default = class Jukebox {
       if (this._inJukebox (map)) {
         return Promise.reject(new Error('Map already in jukebox!'));
       }
+      map.jukeAuthor = player.nickname;
 
       if (pushTop)
         this.jukebox.unshift(map);

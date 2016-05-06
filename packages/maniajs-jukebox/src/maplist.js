@@ -44,8 +44,8 @@ module.exports.default = class Maplist {
     list.display();
     list.on('jukebox', (map) => {
       // Add to jukebox.
-      this.plugin.jukebox.add(map.entry.uid).then((_) => {
-        this.plugin.server.send().chat(`$0f3$<$fff${player.nickname}$>$0f3 added map $0f3$<$fff${map.entry.name}$>$0f3 to the jukebox!`).exec();
+      this.plugin.jukebox.add(map.entry.uid, player).then(() => {
+        this.plugin.server.send().chat(`$c70$<$fff${player.nickname}$>$c70 added map $c70$<$fff${map.entry.name}$>$c70 to the jukebox!`).exec();
       }).catch((err) => {
         this.plugin.server.send().chat(`Error: ${err.message}`, {destination: player.login}).exec();
       });

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "main": "src/plugin.js",
-  "description": "ManiaJS Plugin - Jukebox Plugin",
+  "description": "ManiaJS Plugin - Jukebox and maplist Plugin",
   "keywords": [
     "maniajs",
     "maniaplanet",

@@ -8,7 +8,7 @@ let Maplist = require('./maplist').default;
 let Jukebox = require('./jukebox').default;
 
 /**
- * Jukebox Plugin.
+ * Jukebox and maplist Plugin.
  */
 module.exports.default = class extends Plugin {
 
@@ -44,6 +44,12 @@ module.exports.default = class extends Plugin {
       this.server.command.on('list', 0, (playerObject, params) => {
         let player = this.players.list[playerObject.login];
         this.maplist.display(player, params);
+      });
+
+
+
+      this.server.on('match.end', (params) => {
+        this.jukebox.endmap(params);
       });
 
       resolve();
