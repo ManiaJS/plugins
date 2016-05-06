@@ -46,7 +46,29 @@ module.exports.default = class extends Plugin {
         this.maplist.display(player, params);
       });
 
+      // List command.
+      this.server.command.on('jukebox', 0, (playerObject, params) => {
+        if (! params.length) {
+          return this.server.send().chat('$fffUsage: /jukebox [$eeelist, clear$fff]', {destination: playerObject.login}).exec();
+        }
 
+        let player = this.players.list[playerObject.login];
+        switch (params.shift()) {
+          case 'list':
+            this.jukebox.list(player, params);
+            break;
+          case 'clear':
+            if (playerObject.level > 2) {
+              this.jukebox.clear();
+              this.server.send().chat(`$c70$<$fff${playerObject.nickname}$>$c70 cleared the jukebox!`).exec();
+            } else {
+              this.server.send().chat('$fffYou don\'t have the right permission to use this command!', {destination: playerObject.login}).exec();
+            }
+            break;
+          default:
+            return this.server.send().chat('$fffUsage: /jukebox [$eeelist, clear$fff]', {destination: playerObject.login}).exec();
+        }
+      });
 
       this.server.on('match.end', (params) => {
         this.jukebox.endmap(params);
