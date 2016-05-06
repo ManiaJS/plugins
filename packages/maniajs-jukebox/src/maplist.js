@@ -34,6 +34,7 @@ module.exports.default = class Maplist {
     Object.keys(this.plugin.maps.list).forEach((uid) => {
       let map = this.plugin.maps.list[uid];
       data.push({
+        uid: map.uid,
         name: map.name,
         author: map.author
       });
@@ -42,7 +43,12 @@ module.exports.default = class Maplist {
     let list = this.app.ui.list('Maps on the server', player.login, cols, data);
     list.display();
     list.on('jukebox', (map) => {
-      console.log('jukebox map: ', map);
+      // Add to jukebox.
+      this.plugin.jukebox.add(map.entry.uid).then((_) => {
+        this.plugin.server.send().chat(`$0f3$<$fff${player.nickname}$>$0f3 added map $0f3$<$fff${map.entry.name}$>$0f3 to the jukebox!`).exec();
+      }).catch((err) => {
+        this.plugin.server.send().chat(`Error: ${err.message}`, {destination: player.login}).exec();
+      });
     });
   }
 };
