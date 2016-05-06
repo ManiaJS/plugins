@@ -52,6 +52,16 @@ module.exports.default = class {
       level: 1,
       text: 'Replay current map, add to the jukebox.'
     }, (player, params) => this._replay(player, params));
+
+    /**
+     * /admin savemaps
+     * Save matchsettings list to disk!
+     */
+    manager.on('savemaps', {
+      admin: true,
+      level: 2,
+      text: 'Save maplist to matchsettings configuration.'
+    }, (player, params) => this._savemaplist(player, params));
   }
 
   _skip (player, params) {
@@ -70,5 +80,9 @@ module.exports.default = class {
       this.server.send().custom('SetNextMapIdent', [this.plugin.maps.current.uid]).exec();
       this.server.send().chat('$fffCurrent map will be replayed!').exec();
     }
+  }
+
+  _savemaplist (player, params) {
+    // TODO.
   }
 };
