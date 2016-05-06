@@ -1,11 +1,11 @@
 'use strict';
 
 var Package = require('./../package.json');
-var path    = require('path');
-
-var async   = require('async');
 
 var Plugin  = require('@maniajs/plugin').default;
+
+let Maplist = require('./maplist').default;
+let Jukebox = require('./jukebox').default;
 
 /**
  * Jukebox Plugin.
@@ -36,45 +36,17 @@ module.exports.default = class extends Plugin {
    */
   init() {
     return new Promise((resolve, reject) => {
-      this.server.command.on('list', 0, (player, params) => {
-        let plyr = this.players.list[player.login];
-        this.displayList(plyr);
+      // Init subclasses
+      this.maplist = new Maplist(this);
+      this.jukebox = new Jukebox(this);
+
+      // List command.
+      this.server.command.on('list', 0, (playerObject, params) => {
+        let player = this.players.list[playerObject.login];
+        this.maplist.display(player, params);
       });
 
       resolve();
     });
-  }
-
-  /**
-   * Displays the map list to the player.
-   *
-   * @param player
-   */
-  displayList(player) {
-    let cols = [
-      {
-        name: 'Name',
-        field: 'name',
-        width: 120,
-        level: 0
-      },
-      {
-        name: 'Author',
-        field: 'author',
-        width: 40,
-        level: 0
-      }
-    ];
-    var data = [];
-    Object.keys(this.maps.list).forEach((uid) => {
-      let map = this.maps.list[uid];
-      data.push({
-        name: map.name,
-        author: map.author
-      });
-    });
-
-    let list = this.app.ui.list('Maps on the server', player.login, cols, data);
-    list.display();
   }
 };
