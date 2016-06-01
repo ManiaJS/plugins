@@ -75,6 +75,7 @@ module.exports.default = class extends EventEmitter {
     this.maps = app.maps;
     this.plugins = app.plugins;
     this.ui = app.ui;
+    this.models = app.models[this.name] || {};
   }
 };
 
