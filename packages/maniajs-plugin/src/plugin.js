@@ -7,6 +7,7 @@ var EventEmitter = require('events').EventEmitter;
 /**
  * Plugin Interface
  * @class Plugin
+ * @type {Plugin}
  *
  * @property {App} app App Context.
  * @property {Logger|{}} log Plugin Logging Instance (bunyan).
@@ -76,3 +77,10 @@ module.exports.default = class extends EventEmitter {
     this.ui = app.ui;
   }
 };
+
+/**
+ * Export alias of BasePlugin class.
+ * @type {Plugin}
+ * @class Plugin
+ */
+module.exports.BasePlugin = module.exports.default;
