@@ -20,3 +20,13 @@ node_modules
 *.ipr
 *.iws
 .idea/
+
+
+### Typescript/Babel
+packages/*/lib/
+.grunt
+.baseDir.ts
+.tscache
+tmp/*
+packages/*/typings/*
+!packages/*/typings/custom
