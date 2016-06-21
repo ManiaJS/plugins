@@ -10,6 +10,9 @@
 
         <label posn="1 -2.7 0.04" sizen="13.55 2" scale="1" text="{{mapname}}"/>
         <label posn="1 -4.5 0.04" sizen="13 2" scale="0.9" text="by {{author}}"/>
-        <quad posn="0.7 -6.25 0.04" sizen="1.7 1.7" style="BgRaceScore2" substyle="ScoreReplay"/>
-        <label posn="2.7 -6.55 0.04" sizen="6 2" scale="0.75" text="{{author_time}}"/>
+
+        {{#if author_time}}
+          <quad posn="0.7 -6.25 0.04" sizen="1.7 1.7" style="BgRaceScore2" substyle="ScoreReplay"/>
+          <label posn="2.7 -6.55 0.04" sizen="6 2" scale="0.75" text="{{author_time}}"/>
+        {{/if}}
     </frame>

@@ -165,7 +165,13 @@ module.exports.default = class extends Plugin {
     mapPromise.then((map) => {
       this.widgetSettings.mapname = map.Name;
       this.widgetSettings.author = map.Author;
-      this.widgetSettings.author_time = this.app.util.times.stringTime(map.AuthorTime);
+      
+      if (this.app.config.config.server.game === 'shootmania') {
+        this.widgetSettings.author_time = '';
+      } else {
+        this.widgetSettings.author_time = this.app.util.times.stringTime(map.AuthorTime);
+      }
+
       this.mapWidget.global(this.widgetSettings).update();
     });
   }
