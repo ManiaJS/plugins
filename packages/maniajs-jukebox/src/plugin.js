@@ -24,7 +24,7 @@ module.exports.default = class extends Plugin {
     this.dependencies = [];
 
     // Game Requirements
-    this.game.games = ['trackmania']; // Only for trackmania
+    this.game.games = ['trackmania', 'shootmania'];
     this.game.modes = [1, 2, 3, 4, 5]; // rounds,timeattack,team,laps,cup
   }
 
