@@ -118,7 +118,7 @@ module.exports.default = class extends Plugin {
     return new Promise((resolve, reject) => {
       // Event
       this.server.on('map.begin',
-        (params) => this.loadVotes(params));
+        (params) => this.loadVotes(this.maps.current));
 
       this.server.on('player.connect', (params) => {
         let player = this.players.list[params.login];
@@ -158,6 +158,12 @@ module.exports.default = class extends Plugin {
       });
 
       this.loadVotes(this.maps.current).then(() => {
+        Object.keys(this.players.list).forEach((login) => {
+          let player = this.players.list[login];
+          this.displayVotes(player);
+          this.displayKarmaWidget(player);
+        });
+
         resolve();
       }).catch((err) => {
         reject(err);
@@ -166,7 +172,7 @@ module.exports.default = class extends Plugin {
   }
 
   /**
-   * Function will display the map karma based on the current map (does not use map input).
+   * Load the karma votes for the map into the plugin.
    *
    * @param map
    *
@@ -177,7 +183,7 @@ module.exports.default = class extends Plugin {
 
     return this.models.Karma.findAll({
       where: {
-        MapId: this.maps.current.id
+        MapId: map.id
       },
       include: [Player]
     }).then((votes) => {
@@ -192,11 +198,35 @@ module.exports.default = class extends Plugin {
           this.minVotes++;
         }
       });
+    });
+  }
 
-      Object.keys(this.players.list).forEach((login) => {
-        let player = this.players.list[login];
-        this.displayVotes(player);
-        this.displayKarmaWidget(player);
+  /**
+   * Returns the map karma for the requested map.
+   * 
+   * @param map
+   *
+   * @returns {Promise}
+   */
+  getMapKarma(map) {
+    return new Promise((resolve, reject) => {
+      this.models.Karma.findAll({
+        where: {
+          MapId: map.id
+        }
+      }).then((votes) => {
+        var plusVotes = 0;
+        var minVotes = 0;
+
+        votes.forEach((vote) => {
+          if(vote.score == 1) {
+            plusVotes++;
+          } else if(vote.score == -1) {
+            minVotes++;
+          }
+        });
+
+        resolve((plusVotes - minVotes));
       });
     });
   }
