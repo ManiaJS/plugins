@@ -77,6 +77,13 @@ module.exports.default = class extends Plugin {
       }
     };
 
+    this.setWidgetSettings();
+  }
+
+  /**
+   * Sets the widget settings property.
+   */
+  setWidgetSettings() {
     this.widgetSettings = {
       manialinkid: 'LocalRecords',
       actionid: 'OpenLocalRecords',
@@ -219,6 +226,8 @@ module.exports.default = class extends Plugin {
     if(this.config.hasOwnProperty('widgety') && this.config.widgety != '') {
       this.widgetY = this.config.widgety;
     }
+
+    this.setWidgetSettings();
   }
 
   /**
