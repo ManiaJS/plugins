@@ -286,6 +286,27 @@ module.exports.default = class extends Plugin {
   }
 
   /**
+   * Function will return the local record for map.
+   *
+   * @param map
+   *
+   * @returns {Promise}
+   */
+  getMapRecord(map) {
+    let Player = this.app.models.Player;
+
+    return this.models.LocalRecord.findOne({
+      where: {
+        MapId: map.id
+      },
+      order: [
+        ['score', 'ASC']
+      ],
+      include: [Player]
+    });
+  }
+
+  /**
    * Displays the local record for the player.
    *
    * @param player

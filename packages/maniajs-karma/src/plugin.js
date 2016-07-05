@@ -209,25 +209,10 @@ module.exports.default = class extends Plugin {
    * @returns {Promise}
    */
   getMapKarma(map) {
-    return new Promise((resolve, reject) => {
-      this.models.Karma.findAll({
-        where: {
-          MapId: map.id
-        }
-      }).then((votes) => {
-        var plusVotes = 0;
-        var minVotes = 0;
-
-        votes.forEach((vote) => {
-          if(vote.score == 1) {
-            plusVotes++;
-          } else if(vote.score == -1) {
-            minVotes++;
-          }
-        });
-
-        resolve((plusVotes - minVotes));
-      });
+    return this.models.Karma.sum('score', {
+      where: {
+        MapId: map.id
+      }
     });
   }
 

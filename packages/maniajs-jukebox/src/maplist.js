@@ -16,7 +16,7 @@ module.exports.default = class Maplist {
       {
         name: 'Name',
         field: 'name',
-        width: 120,
+        width: 100,
         level: 0,
         sort: true,
         event: 'jukebox'
@@ -24,7 +24,7 @@ module.exports.default = class Maplist {
       {
         name: 'Author',
         field: 'author',
-        width: 40,
+        width: 30,
         level: 0,
         sort: true,
         event: 'searchAuthor'
@@ -39,7 +39,8 @@ module.exports.default = class Maplist {
           uid: map.uid,
           name: map.name,
           author: map.author,
-          karma: 0
+          karma: 0,
+          record: 0
         });
       });
     } else {
@@ -56,7 +57,8 @@ module.exports.default = class Maplist {
                 uid: map.uid,
                 name: map.name,
                 author: map.author,
-                karma: 0
+                karma: 0,
+                record: 0
               });
             }
           });
@@ -64,8 +66,8 @@ module.exports.default = class Maplist {
       }
     }
 
-    let promise;
-
+    let karmaPromise;
+    let startTime = Date.now();
     if(this.app.plugins.hasOwnProperty('@maniajs/plugin-karma')) {
       cols.push({
         name: 'Karma',
@@ -82,12 +84,38 @@ module.exports.default = class Maplist {
         });
       }
 
-      promise = Promise.all(data.map(mapper));
+      karmaPromise = Promise.all(data.map(mapper));
     } else {
-      promise = Promise.resolve(data);
+      karmaPromise = Promise.resolve(data);
     }
 
-    promise.then((data) => {
+    let recordPromise;
+    if(this.app.plugins.hasOwnProperty('@maniajs/plugin-localrecords')) {
+      cols.push({
+        name: 'Record',
+        field: 'record',
+        width: 50,
+        level: 0,
+        sort: true
+      });
+
+      let mapper = (map) => {
+        return this.app.plugins['@maniajs/plugin-localrecords'].getMapRecord(this.plugin.maps.list[map.uid]).then((record) => {
+          map.record = (this.app.util.times.stringTime(record.score) + ' ($<' + record.Player.nickname + '$>)');
+          return map;
+        });
+      }
+
+      recordPromise = Promise.all(data.map(mapper));
+    } else {
+      recordPromise = Promise.resolve(data);
+    }
+
+    Promise.all([karmaPromise, recordPromise]).then(() => {
+      let endTime = Date.now();
+
+      console.log('Start: ' + startTime + ', end: ' + endTime + ' => difference: ' + (endTime - startTime));
+
       let list = this.app.ui.list('Maps on the server', player.login, cols, data);
       list.display();
       list.on('jukebox', (map) => {
