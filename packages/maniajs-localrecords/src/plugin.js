@@ -257,9 +257,13 @@ module.exports.default = class extends Plugin {
       where: {
         MapId: this.maps.current.id
       },
+      order: [
+        ['score', 'ASC']
+      ],
+      limit: this.recordlimit,
       include: [Player]
     }).then((records) => {
-      this.records = records.sort((a, b) => a.score - b.score);
+      this.records = records;
 
       if(this.chatdisplay) {
         var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f';
