@@ -307,6 +307,26 @@ module.exports.default = class extends Plugin {
   }
 
   /**
+   * Function will return the personal record for map.
+   *
+   * @param map
+   * @param player
+   *
+   * @returns {Promise}
+   */
+  getPersonalMapRecord(map, player) {
+    let Player = this.app.models.Player;
+
+    return this.models.LocalRecord.findOne({
+      where: {
+        MapId: map.id,
+        PlayerId: player.id
+      },
+      include: [Player]
+    });
+  }
+
+  /**
    * Displays the local record for the player.
    *
    * @param player

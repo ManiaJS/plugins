@@ -37,14 +37,20 @@ module.exports.default = class Maplist {
       let command = params.shift();
       switch(command) {
         case 'help':
-          return this.plugin.server.send().chat('$fffUsage: /list [$eee<author>$fff]', {destination: player.login}).exec();
-          break;
-        case 'records':
-          this.displayWithRecord(player, cols);
+          return this.plugin.server.send().chat('$fffUsage: /list [$eee<author>, karma <+, -, #>, records, personal, nofinish$fff]', {destination: player.login}).exec();
           break;
         case 'karma':
           let karma = params.shift();
           this.displayByKarma(player, cols, karma);
+          break;
+        case 'personal':
+          this.displayWithPersonalRecord(player, cols, true);
+          break;
+        case 'nofinish':
+          this.displayWithPersonalRecord(player, cols, false);
+          break;
+        case 'records':
+          this.displayWithRecord(player, cols);
           break;
         default:
           this.displayByAuthor(player, cols, command);
@@ -192,6 +198,44 @@ module.exports.default = class Maplist {
   }
 
   /**
+   * Display list with personal record (name, author, record) for all maps.
+   * @param {Player} player
+   * @param cols
+   */
+  displayWithPersonalRecord(player, cols, finished) {
+    var data = [];
+    Object.keys(this.plugin.maps.list).forEach((uid) => {
+      let map = this.plugin.maps.list[uid];
+      data.push({
+        uid: map.uid,
+        name: map.name,
+        author: map.author
+      });
+    });
+
+    this.displayIncludePersonalRecord(data, player).then((result) => {
+      let title;
+      if(finished) {
+        cols.push({
+          name: 'Personal Record',
+          field: 'personalrecord',
+          width: 50,
+          level: 0,
+          sort: true
+        });
+
+        data = result.filter((a) => a.personalrecord != 'none');
+        title = 'Maps on the server with personal record';
+      } else {
+        data = result.filter((a) => a.personalrecord == 'none');
+        title = 'Maps on the server with no personal time';
+      }
+
+      this.displayList(title, player, cols, data);
+    });
+  }
+
+  /**
    * Add karma to the list.
    * @param data
    *
@@ -223,6 +267,30 @@ module.exports.default = class Maplist {
       let mapper = (map) => {
         return this.app.plugins['@maniajs/plugin-localrecords'].getMapRecord(this.plugin.maps.list[map.uid]).then((record) => {
           map.record = (this.app.util.times.stringTime(record.score) + ' ($<' + record.Player.nickname + '$>)');
+          return map;
+        });
+      }
+
+      return Promise.all(data.map(mapper));
+    } else {
+      return Promise.resolve(data);
+    }
+  }
+
+  /**
+   * Add local record to the list.
+   * @param data
+   *
+   * returns {Promise}
+   */
+  displayIncludePersonalRecord(data, player) {
+    if(this.app.plugins.hasOwnProperty('@maniajs/plugin-localrecords')) {
+      let mapper = (map) => {
+        return this.app.plugins['@maniajs/plugin-localrecords'].getPersonalMapRecord(this.plugin.maps.list[map.uid], player).then((record) => {
+          map.personalrecord = this.app.util.times.stringTime(record.score);
+          return map;
+        }).catch(() => {
+          map.personalrecord = 'none';
           return map;
         });
       }
