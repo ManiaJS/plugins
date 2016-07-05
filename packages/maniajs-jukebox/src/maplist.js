@@ -42,6 +42,10 @@ module.exports.default = class Maplist {
         case 'records':
           this.displayWithRecord(player, cols);
           break;
+        case 'karma':
+          let karma = params.shift();
+          this.displayByKarma(player, cols, karma);
+          break;
         default:
           this.displayByAuthor(player, cols, command);
           break;
@@ -74,7 +78,7 @@ module.exports.default = class Maplist {
         sort: true
       });
 
-      this.displayList(player, cols, result);
+      this.displayList('Maps on the server', player, cols, result);
     });
   }
 
@@ -106,7 +110,55 @@ module.exports.default = class Maplist {
         sort: true
       });
 
-      this.displayList(player, cols, result);
+      this.displayList('Maps on the server by ' + author, player, cols, result);
+    });
+  }
+
+  /**
+   * Display general list (name, author, karma) by karma.
+   * @param {Player} player
+   * @param cols
+   * @param karma
+   */
+  displayByKarma(player, cols, karma) {
+    var data = [];
+    Object.keys(this.plugin.maps.list).forEach((uid) => {
+      let map = this.plugin.maps.list[uid];
+      data.push({
+        uid: map.uid,
+        name: map.name,
+        author: map.author
+      });
+    });
+
+    this.displayIncludeKarma(data).then((result) => {
+      cols.push({
+        name: 'Karma',
+        field: 'karma',
+        width: 20,
+        level: 0,
+        sort: true
+      });
+
+      let titleAddition;
+
+      if(karma == undefined || karma == '+' || karma == '++') {
+        data = result.sort((a, b) => b.karma - a.karma);
+        titleAddition = 'ordered by karma (DESC)';
+      } else if(karma == '-' || karma == '--') {
+        data = result.sort((a, b) => a.karma - b.karma);
+        titleAddition = 'ordered by karma (ASC)';
+      } else if(karma < 0) {
+        data = result.filter((a) => a.karma <= karma);
+        data = data.sort((a, b) => a.karma - b.karma);
+        titleAddition = 'with karma <= ' + karma;
+      } else if(karma >= 0) {
+        data = result.filter((a) => a.karma >= karma);
+        data = data.sort((a, b) => b.karma - a.karma);
+        titleAddition = 'with karma >= ' + karma;
+      }
+
+      this.displayList('Maps on the server ' + titleAddition, player, cols, data);
     });
   }
 
@@ -135,7 +187,7 @@ module.exports.default = class Maplist {
         sort: true
       });
 
-      this.displayList(player, cols, result);
+      this.displayList('Maps on the server with local record', player, cols, result);
     });
   }
 
@@ -183,12 +235,13 @@ module.exports.default = class Maplist {
 
   /**
    * Set ManiaLink and display on screen.
+   * @param title
    * @param {Player} player
    * @param cols
    * @param data
    */
-  displayList(player, cols, data) {
-    let list = this.app.ui.list('Maps on the server', player.login, cols, data);
+  displayList(title, player, cols, data) {
+    let list = this.app.ui.list(title, player.login, cols, data);
     list.display();
     list.on('jukebox', (map) => {
       // Add to jukebox.
