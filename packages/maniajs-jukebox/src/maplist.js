@@ -113,8 +113,7 @@ module.exports.default = class Maplist {
 
     Promise.all([karmaPromise, recordPromise]).then(() => {
       let endTime = Date.now();
-
-      console.log('Start: ' + startTime + ', end: ' + endTime + ' => difference: ' + (endTime - startTime));
+      this.app.log.debug('Time needed to load the maplist: ' + (endTime - startTime) + 'ms');
 
       let list = this.app.ui.list('Maps on the server', player.login, cols, data);
       list.display();

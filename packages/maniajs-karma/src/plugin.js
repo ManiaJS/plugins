@@ -117,8 +117,13 @@ module.exports.default = class extends Plugin {
   init() {
     return new Promise((resolve, reject) => {
       // Event
-      this.server.on('map.begin',
-        (params) => this.loadVotes(this.maps.current));
+      this.server.on('map.begin', (params) => this.loadVotes(this.maps.current).then(() => {
+        Object.keys(this.players.list).forEach((login) => {
+          let player = this.players.list[login];
+          this.displayVotes(player);
+          this.displayKarmaWidget(player);
+        });
+      }));
 
       this.server.on('player.connect', (params) => {
         let player = this.players.list[params.login];
@@ -136,6 +141,7 @@ module.exports.default = class extends Plugin {
         this.displayList(player);
       });
 
+      this.server.command.on('karma', 0, (player, params) => this.displayVotes(player));
       this.server.command.on('++', 0, (player, params) => this.votePositive(player, false));
       this.server.command.on('--', 0, (player, params) => this.voteNegative(player, false));
       this.server.on('player.chat', (params) => {
