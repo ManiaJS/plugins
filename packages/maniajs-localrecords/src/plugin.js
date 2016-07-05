@@ -330,12 +330,35 @@ module.exports.default = class extends Plugin {
   getPersonalMapRecord(map, player) {
     let Player = this.app.models.Player;
 
-    return this.models.LocalRecord.findOne({
-      where: {
-        MapId: map.id,
-        PlayerId: player.id
-      },
-      include: [Player]
+    return new Promise((resolve, reject) => {
+      this.models.LocalRecord.findOne({
+        where: {
+          MapId: map.id,
+          PlayerId: player.id
+        },
+        include: [Player]
+      }).then((data) => {
+        if(!data) return reject('No record');
+  
+        this.models.LocalRecord.count({
+          where: {
+            MapId: data.MapId,
+            score: {
+              $lt: data.score
+            }
+          }
+        }).then((count) => {
+          if((count + 1) <= this.recordlimit) {
+            data.rank = (count + 1);
+          } else {
+            data.rank = null;
+          }
+
+          return resolve(data);
+        });
+      }).catch((error) => { 
+        return reject(error);
+      });
     });
   }
 

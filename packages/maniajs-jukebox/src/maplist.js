@@ -37,17 +37,23 @@ module.exports.default = class Maplist {
       let command = params.shift();
       switch(command) {
         case 'help':
-          return this.plugin.server.send().chat('$fffUsage: /list [$eee<author>, karma <+, -, #>, records, personal, nofinish$fff]', {destination: player.login}).exec();
+          return this.plugin.server.send().chat('$fffUsage: /list [$eee<author>, karma <+, -, #>, records, personal, nofinish, best, worst$fff]', {destination: player.login}).exec();
           break;
         case 'karma':
           let karma = params.shift();
           this.displayByKarma(player, cols, karma);
           break;
         case 'personal':
-          this.displayWithPersonalRecord(player, cols, true);
+          this.displayWithPersonalRecord(player, cols, 'personal');
           break;
         case 'nofinish':
-          this.displayWithPersonalRecord(player, cols, false);
+          this.displayWithPersonalRecord(player, cols, 'nofinish');
+          break;
+        case 'best':
+          this.displayWithPersonalRecord(player, cols, 'best');
+          break;
+        case 'worst':
+          this.displayWithPersonalRecord(player, cols, 'worst');
           break;
         case 'records':
           this.displayWithRecord(player, cols);
@@ -202,7 +208,7 @@ module.exports.default = class Maplist {
    * @param {Player} player
    * @param cols
    */
-  displayWithPersonalRecord(player, cols, finished) {
+  displayWithPersonalRecord(player, cols, command) {
     var data = [];
     Object.keys(this.plugin.maps.list).forEach((uid) => {
       let map = this.plugin.maps.list[uid];
@@ -215,7 +221,10 @@ module.exports.default = class Maplist {
 
     this.displayIncludePersonalRecord(data, player).then((result) => {
       let title;
-      if(finished) {
+      if(command == 'nofinish') {
+        data = result.filter((a) => a.personalrecord == 'none');
+        title = 'Maps on the server with no personal time';
+      } else {
         cols.push({
           name: 'Personal Record',
           field: 'personalrecord',
@@ -225,10 +234,30 @@ module.exports.default = class Maplist {
         });
 
         data = result.filter((a) => a.personalrecord != 'none');
-        title = 'Maps on the server with personal record';
-      } else {
-        data = result.filter((a) => a.personalrecord == 'none');
-        title = 'Maps on the server with no personal time';
+
+        if(command == 'personal') {
+          title = 'Maps on the server with personal record';
+        } else if(command == 'best') {
+          data = data.sort((a, b) => { 
+            if(a.personalrank != null && b.personalrank != null)
+              return a.personalrank - b.personalrank;
+            if(a.personalrank == null)
+              return 1;
+            if(b.personalrank == null)
+              return -1;
+          });
+          title = 'Maps on the server with personal record (best)';
+        } else if(command == 'worst') {
+          data = data.sort((a, b) => { 
+            if(a.personalrank != null && b.personalrank != null)
+              return b.personalrank - a.personalrank;
+            if(b.personalrank == null)
+              return 1;
+            if(a.personalrank == null)
+              return -1;
+          });
+          title = 'Maps on the server with personal record (worst)';
+        }
       }
 
       this.displayList(title, player, cols, data);
@@ -288,6 +317,11 @@ module.exports.default = class Maplist {
       let mapper = (map) => {
         return this.app.plugins['@maniajs/plugin-localrecords'].getPersonalMapRecord(this.plugin.maps.list[map.uid], player).then((record) => {
           map.personalrecord = this.app.util.times.stringTime(record.score);
+          map.personalrank = record.rank;
+
+          if(record.rank != null) {
+           map.personalrecord += ' (' + record.rank + ')';
+          }
           return map;
         }).catch(() => {
           map.personalrecord = 'none';
