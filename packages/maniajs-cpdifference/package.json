@@ -1,0 +1,25 @@
+{
+  "name": "@maniajs/plugin-cpdifference",
+  "version": "0.0.0",
+  "main": "src/plugin.js",
+  "description": "ManiaJS Plugin - CP Difference Plugin, displays difference between current CP time and local/dedimania CP time.",
+  "keywords": [
+    "maniajs",
+    "maniaplanet",
+    "trackmania",
+    "plugin",
+    "cpdifference"
+  ],
+  "bugs": {
+    "url": "https://github.com/ManiaJS/plugins/issues"
+  },
+  "license": "ISC",
+  "repository": "https://github.com/ManiaJS/plugins/tree/master/packages/maniajs-cpdifference",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "dependencies": {
+    "async": "^1.5.2",
+    "@maniajs/plugin": "0.*"
+  }
+}
