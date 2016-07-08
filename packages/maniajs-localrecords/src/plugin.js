@@ -363,6 +363,42 @@ module.exports.default = class extends Plugin {
   }
 
   /**
+   * Get last (so recordlimit, or higher if less records) local record for map.
+   *
+   * @param map
+   */
+  getLastMapRecord(map) {
+    let Player = this.app.models.Player;
+
+    return new Promise((resolve, reject) => { 
+      this.models.LocalRecord.count({
+        where: {
+          MapId: map.id
+        }
+      }).then((count) => {
+        var limit = this.recordlimit;
+        if(count < this.recordlimit) {
+          limit = count;
+        }
+
+        this.models.LocalRecord.findOne({
+          where: {
+            MapId: map.id,
+          },
+          order: [
+            ['score', 'ASC']
+          ],
+          offset: (limit - 1),
+          include: [Player]
+        }).then((data) => {
+          data.rank = limit;
+          return resolve(data);
+        });
+      });
+    });
+  }
+
+  /**
    * Displays the local record for the player.
    *
    * @param player

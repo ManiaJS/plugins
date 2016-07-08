@@ -146,11 +146,17 @@ module.exports.default = class extends Plugin {
     let player = this.players.list[checkpoint.login];
     if(this.players[player.login] == 'own') {
       this.app.plugins['@maniajs/plugin-localrecords'].getPersonalMapRecord(this.maps.list[this.maps.current.uid], player).then((personalRecord) => {
-        let checkpoints = personalRecord.checkpoints.split(',');
-        let currentCheckpoint = checkpoint.timeOrScore;
-        let recordCheckpoint = checkpoints[checkpoint.checkpoint];
-        
-        this.displayUI(player, 'personal', currentCheckpoint, recordCheckpoint);
+        if(personalRecord.rank != null) {
+          let checkpoints = personalRecord.checkpoints.split(',');
+          let currentCheckpoint = checkpoint.timeOrScore;
+          let recordCheckpoint = checkpoints[checkpoint.checkpoint];
+          
+          this.displayUI(player, 'personal', currentCheckpoint, recordCheckpoint);
+        } else {
+          this.playerCheckpointLastRecord(player, checkpoint);
+        }
+      }).catch(() => {
+        this.playerCheckpointLastRecord(player, checkpoint);
       });
     } else if(this.players[player.login] == 'local') {
       this.app.plugins['@maniajs/plugin-localrecords'].getMapRecord(this.maps.list[this.maps.current.uid]).then((localRecord) => {
@@ -161,6 +167,22 @@ module.exports.default = class extends Plugin {
         this.displayUI(player, 'local', currentCheckpoint, recordCheckpoint);
       });
     }
+  }
+
+  /**
+   * Function requests last record to be displayed.
+   *
+   * @param player
+   * @param checkpoint
+   */
+  playerCheckpointLastRecord(player, checkpoint) {
+    this.app.plugins['@maniajs/plugin-localrecords'].getLastMapRecord(this.maps.list[this.maps.current.uid]).then((lastRecord) => {
+      let checkpoints = lastRecord.checkpoints.split(',');
+      let currentCheckpoint = checkpoint.timeOrScore;
+      let recordCheckpoint = checkpoints[checkpoint.checkpoint];
+      
+      this.displayUI(player, 'last', currentCheckpoint, recordCheckpoint);
+    });
   }
 
   /**
