@@ -59,23 +59,21 @@ module.exports.default = class extends EventEmitter {
   /**
    * Inject Core App interface into the plugin.
    *
-   * @param {App} app App context.
-   * @param {object} config Plugin config.
-   * @param {Logger|{}} log Child Logger.
+   * @param {{}} props Injectable properties.
    */
-  inject(app, config, log) {
-    this.app = app;
-    this.config = config;
-    this.log = log;
+  inject(props) {
+    this.app = props.app;
+    this.config = props.config;
+    this.log = props.log;
 
-    this.server = app.server;
+    this.server = props.app.server;
 
     // Expand app into separate parts.
-    this.players = app.players;
-    this.maps = app.maps;
-    this.plugins = app.plugins;
-    this.ui = app.ui;
-    this.models = app.models[this.name] || {};
+    this.players = props.app.players;
+    this.maps = props.app.maps;
+    this.plugins = props.app.plugins;
+    this.ui = props.app.ui;
+    this.models = props.app.models[this.name] || {};
   }
 };
 
