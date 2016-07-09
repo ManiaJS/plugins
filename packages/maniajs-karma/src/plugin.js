@@ -117,8 +117,13 @@ module.exports.default = class extends Plugin {
   init() {
     return new Promise((resolve, reject) => {
       // Event
-      this.server.on('map.begin',
-        (params) => this.loadVotes(params));
+      this.server.on('map.begin', (params) => this.loadVotes(this.maps.current).then(() => {
+        Object.keys(this.players.list).forEach((login) => {
+          let player = this.players.list[login];
+          this.displayVotes(player);
+          this.displayKarmaWidget(player);
+        });
+      }));
 
       this.server.on('player.connect', (params) => {
         let player = this.players.list[params.login];
@@ -136,6 +141,7 @@ module.exports.default = class extends Plugin {
         this.displayList(player);
       });
 
+      this.server.command.on('karma', 0, (player, params) => this.displayVotes(player));
       this.server.command.on('++', 0, (player, params) => this.votePositive(player, false));
       this.server.command.on('--', 0, (player, params) => this.voteNegative(player, false));
       this.server.on('player.chat', (params) => {
@@ -158,6 +164,12 @@ module.exports.default = class extends Plugin {
       });
 
       this.loadVotes(this.maps.current).then(() => {
+        Object.keys(this.players.list).forEach((login) => {
+          let player = this.players.list[login];
+          this.displayVotes(player);
+          this.displayKarmaWidget(player);
+        });
+
         resolve();
       }).catch((err) => {
         reject(err);
@@ -166,7 +178,7 @@ module.exports.default = class extends Plugin {
   }
 
   /**
-   * Function will display the map karma based on the current map (does not use map input).
+   * Load the karma votes for the map into the plugin.
    *
    * @param map
    *
@@ -177,7 +189,7 @@ module.exports.default = class extends Plugin {
 
     return this.models.Karma.findAll({
       where: {
-        MapId: this.maps.current.id
+        MapId: map.id
       },
       include: [Player]
     }).then((votes) => {
@@ -192,12 +204,21 @@ module.exports.default = class extends Plugin {
           this.minVotes++;
         }
       });
+    });
+  }
 
-      Object.keys(this.players.list).forEach((login) => {
-        let player = this.players.list[login];
-        this.displayVotes(player);
-        this.displayKarmaWidget(player);
-      });
+  /**
+   * Returns the map karma for the requested map.
+   * 
+   * @param map
+   *
+   * @returns {Promise}
+   */
+  getMapKarma(map) {
+    return this.models.Karma.sum('score', {
+      where: {
+        MapId: map.id
+      }
     });
   }
 

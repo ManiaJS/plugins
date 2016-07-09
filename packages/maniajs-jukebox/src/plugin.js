@@ -48,17 +48,17 @@ module.exports.default = class extends Plugin {
 
       // List command.
       this.server.command.on('jukebox', 0, (playerObject, params) => {
-        if (! params.length) {
+        if(!params.length) {
           return this.server.send().chat('$fffUsage: /jukebox [$eeelist, clear$fff]', {destination: playerObject.login}).exec();
         }
 
         let player = this.players.list[playerObject.login];
-        switch (params.shift()) {
+        switch(params.shift()) {
           case 'list':
             this.jukebox.list(player, params);
             break;
           case 'clear':
-            if (playerObject.level > 2) {
+            if(playerObject.level > 2) {
               this.jukebox.clear();
               this.server.send().chat(`$c70$<$fff${playerObject.nickname}$>$c70 cleared the jukebox!`).exec();
             } else {
