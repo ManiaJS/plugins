@@ -22,8 +22,7 @@ module.exports.default = class extends Plugin {
     this.records = null;
 
     // Add dependencies, enter module full id's (mostly npm package names) here.
-    // TODO: Should include '@maniajs/plugin-localrecords' as dependency, but this causes a fatal error.
-    this.dependencies = [/*'@maniajs/plugin-localrecords'*/];
+    this.dependencies = ['@maniajs/plugin-localrecords'];
     this.players = [];
   }
 
