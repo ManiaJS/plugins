@@ -46,7 +46,7 @@ module.exports.default = class extends Plugin {
 
     this.server.on('player.connect', (params) => {
       let player = this.players.list[params.login];
-      this.playerRecord(player);
+      this.loadPlayerSetting(player);
     });
 
     this.server.on('player.disconnect', (params) => {
@@ -127,7 +127,7 @@ module.exports.default = class extends Plugin {
             dediBold = '$o';
             break;
         }
-        this.server.send().chat('$fffUsage: /cpdifference [$eee' + ownBold + 'own (or last)' + ownBold + ', ' + localBold + 'local' + localBold + ', ' + dediBold + 'dedi' + dediBold + '$fff]', {destination: player.login}).exec();
+        this.server.send().chat('$fffUsage: /cpdifference (or /cps) [$eee' + ownBold + 'own (or last)' + ownBold + ', ' + localBold + 'local' + localBold + ', ' + dediBold + 'dedi' + dediBold + '$fff]', {destination: player.login}).exec();
         break;
     }
   }
