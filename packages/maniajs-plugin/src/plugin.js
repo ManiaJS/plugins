@@ -17,6 +17,7 @@ var EventEmitter = require('events').EventEmitter;
  * @property {Maps} maps
  * @property {{}} models
  * @property {{}} config
+ * @property {{}} settings
  * @property {UIFacade} ui
  *
  * @property {{modes: number[], game: string[]}} game
@@ -74,6 +75,8 @@ module.exports.default = class extends EventEmitter {
     this.plugins = props.app.plugins;
     this.ui = props.app.ui;
     this.models = props.app.models[this.name] || {};
+
+    this.settings = props.settingStore || null;
   }
 };
 
