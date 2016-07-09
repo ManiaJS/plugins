@@ -70,8 +70,8 @@ module.exports.default = class extends Plugin {
    * @param player
    */
   loadPlayerSetting(player) {
-    this.app.settings.getSettingWithForeignKey(this, 'cpDifference', player.id).then((setting) => {
-      if(!setting) {
+    this.settings.get('cpDifference', player.id).then((setting) => {
+      if(! setting) {
         this.setPlayerSetting(player, 'own');
       } else {
         this.players[player.login] = setting.value;
@@ -87,12 +87,12 @@ module.exports.default = class extends Plugin {
    */
   setPlayerSetting(player, setting) {
     this.players[player.login] = setting;
-    this.app.settings.setSettingWithForeignKey(this, 'cpDifference', setting, player.id);
+    this.settings.set('cpDifference', player.id, setting);
   }
 
   /**
    * Allows player to update their CP Difference setting.
-   * 
+   *
    * @param player
    * @param params
    */
@@ -150,7 +150,7 @@ module.exports.default = class extends Plugin {
           let checkpoints = personalRecord.checkpoints.split(',');
           let currentCheckpoint = checkpoint.timeOrScore;
           let recordCheckpoint = checkpoints[checkpoint.checkpoint];
-          
+
           this.displayUI(player, 'personal', currentCheckpoint, recordCheckpoint);
         } else {
           this.playerCheckpointLastRecord(player, checkpoint);
@@ -163,7 +163,7 @@ module.exports.default = class extends Plugin {
         let checkpoints = localRecord.checkpoints.split(',');
         let currentCheckpoint = checkpoint.timeOrScore;
         let recordCheckpoint = checkpoints[checkpoint.checkpoint];
-        
+
         this.displayUI(player, 'local', currentCheckpoint, recordCheckpoint);
       });
     }
@@ -180,7 +180,7 @@ module.exports.default = class extends Plugin {
       let checkpoints = lastRecord.checkpoints.split(',');
       let currentCheckpoint = checkpoint.timeOrScore;
       let recordCheckpoint = checkpoints[checkpoint.checkpoint];
-      
+
       this.displayUI(player, 'last', currentCheckpoint, recordCheckpoint);
     });
   }
