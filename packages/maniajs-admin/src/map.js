@@ -54,6 +54,16 @@ module.exports.default = class {
     }, (player, params) => this._replay(player, params));
 
     /**
+     * /admin endround
+     * End Round.
+     */
+    manager.on('endround', {
+      admin: true,
+      level: 2,
+      text: 'End current round.'
+    }, (player, params) => this._endround(player, params));
+
+    /**
      * /admin savemaps
      * Save matchsettings list to disk!
      */
@@ -72,6 +82,11 @@ module.exports.default = class {
   _restart (player, params) {
     this.server.send().chat("$fffRestarting map...").exec();
     this.server.send().custom('RestartMap').exec();
+  }
+
+  _endround (player, params) {
+    this.server.send().chat('$fffEnd round...').exec();
+    this.server.send().custom('ForceEndRound').exec();
   }
 
   _replay (player, params) {
