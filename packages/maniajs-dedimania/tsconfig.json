@@ -30,5 +30,8 @@
         "rewriteTsconfig": false
     },
     "files": [
+        "src/logic/DedimaniaClient.ts",
+        "src/logic/Widget.ts",
+        "src/plugin.ts"
     ]
 }

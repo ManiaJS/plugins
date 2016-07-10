@@ -77,6 +77,13 @@ module.exports.default = class extends Plugin {
       }
     };
 
+    this.setWidgetSettings();
+  }
+
+  /**
+   * Sets the widget settings property.
+   */
+  setWidgetSettings() {
     this.widgetSettings = {
       manialinkid: 'LocalRecords',
       actionid: 'OpenLocalRecords',
@@ -219,6 +226,8 @@ module.exports.default = class extends Plugin {
     if(this.config.hasOwnProperty('widgety') && this.config.widgety != '') {
       this.widgetY = this.config.widgety;
     }
+
+    this.setWidgetSettings();
   }
 
   /**
@@ -248,9 +257,13 @@ module.exports.default = class extends Plugin {
       where: {
         MapId: this.maps.current.id
       },
+      order: [
+        ['score', 'ASC']
+      ],
+      limit: this.recordlimit,
       include: [Player]
     }).then((records) => {
-      this.records = records.sort((a, b) => a.score - b.score);
+      this.records = records;
 
       if(this.chatdisplay) {
         var localRecords = '$39fLocal Records on $<$fff' + this.maps.current.name + '$>$39f';
@@ -317,12 +330,71 @@ module.exports.default = class extends Plugin {
   getPersonalMapRecord(map, player) {
     let Player = this.app.models.Player;
 
-    return this.models.LocalRecord.findOne({
-      where: {
-        MapId: map.id,
-        PlayerId: player.id
-      },
-      include: [Player]
+    return new Promise((resolve, reject) => {
+      this.models.LocalRecord.findOne({
+        where: {
+          MapId: map.id,
+          PlayerId: player.id
+        },
+        include: [Player]
+      }).then((data) => {
+        if(!data) return reject('No record');
+  
+        this.models.LocalRecord.count({
+          where: {
+            MapId: data.MapId,
+            score: {
+              $lt: data.score
+            }
+          }
+        }).then((count) => {
+          if((count + 1) <= this.recordlimit) {
+            data.rank = (count + 1);
+          } else {
+            data.rank = null;
+          }
+
+          return resolve(data);
+        });
+      }).catch((error) => { 
+        return reject(error);
+      });
+    });
+  }
+
+  /**
+   * Get last (so recordlimit, or higher if less records) local record for map.
+   *
+   * @param map
+   */
+  getLastMapRecord(map) {
+    let Player = this.app.models.Player;
+
+    return new Promise((resolve, reject) => { 
+      this.models.LocalRecord.count({
+        where: {
+          MapId: map.id
+        }
+      }).then((count) => {
+        var limit = this.recordlimit;
+        if(count < this.recordlimit) {
+          limit = count;
+        }
+
+        this.models.LocalRecord.findOne({
+          where: {
+            MapId: map.id,
+          },
+          order: [
+            ['score', 'ASC']
+          ],
+          offset: (limit - 1),
+          include: [Player]
+        }).then((data) => {
+          data.rank = limit;
+          return resolve(data);
+        });
+      });
     });
   }
 

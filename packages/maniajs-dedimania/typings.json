@@ -1,6 +1,14 @@
 {
   "name": "@maniajs/dedimania",
-  "globalDependencies": {},
+  "globalDependencies": {
+    "@maniajs/xmlrpc": "file:typings/custom/@maniajs/xmlrpc/typings.json",
+    "lodash": "registry:dt/lodash#3.10.0+20160330154726",
+    "maniajs": "https://raw.githubusercontent.com/ManiaJS/ManiaJS/master/type/maniajs.d.ts",
+    "node": "registry:dt/node#6.0.0+20160608110640",
+    "pjson": "file:./typings/custom/pjson/typings.json",
+    "sequelize": "registry:dt/sequelize#3.4.1+20160423143634",
+    "validator": "registry:dt/validator#4.5.1+20160316155526"
+  },
   "devDependencies": {},
   "dependencies": {}
 }
