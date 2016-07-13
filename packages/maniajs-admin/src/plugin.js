@@ -6,6 +6,7 @@ var Plugin  = require('@maniajs/plugin').default;
 
 var PlayerCommands    = require('./player').default;
 var MapCommands       = require('./map').default;
+var GameCommands      = require('./game').default;
 
 /**
  * ManiaJS Admin Plugin.
@@ -33,7 +34,8 @@ module.exports.default = class extends Plugin {
     // Plugin Specific Variables
     this.components = [
       new PlayerCommands(this),
-      new MapCommands(this)
+      new MapCommands(this),
+      new GameCommands(this)
     ];
   }
 

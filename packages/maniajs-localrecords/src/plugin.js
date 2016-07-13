@@ -25,7 +25,7 @@ module.exports.default = class extends Plugin {
 
     // Game Requirements
     this.game.games = ['trackmania']; // Only for trackmania
-    this.game.modes = [1, 2, 3, 4, 5]; // rounds,timeattack,team,laps,cup
+    this.game.modes = [1, 2, 3, 5]; // rounds,timeattack,team,laps,cup
 
     // Plugin properties
     this.records = null;
@@ -339,7 +339,7 @@ module.exports.default = class extends Plugin {
         include: [Player]
       }).then((data) => {
         if(!data) return reject('No record');
-  
+
         this.models.LocalRecord.count({
           where: {
             MapId: data.MapId,
@@ -356,7 +356,7 @@ module.exports.default = class extends Plugin {
 
           return resolve(data);
         });
-      }).catch((error) => { 
+      }).catch((error) => {
         return reject(error);
       });
     });
@@ -370,7 +370,7 @@ module.exports.default = class extends Plugin {
   getLastMapRecord(map) {
     let Player = this.app.models.Player;
 
-    return new Promise((resolve, reject) => { 
+    return new Promise((resolve, reject) => {
       this.models.LocalRecord.count({
         where: {
           MapId: map.id
