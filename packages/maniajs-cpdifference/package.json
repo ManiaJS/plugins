@@ -19,7 +19,7 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "async": "^1.5.2",
-    "@maniajs/plugin": "0.*"
+    "@maniajs/plugin": "0.*",
+    "async": "^2.0.1"
   }
 }
